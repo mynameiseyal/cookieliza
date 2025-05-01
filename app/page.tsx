@@ -90,9 +90,20 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
-        <section className="bg-pink-50 rounded-lg p-8 mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">ברוכים הבאים לקוקי ליזה</h2>
-          <p className="text-lg text-gray-600">מאפים טריים שנעשו באהבה!</p>
+        <section className="bg-pink-50 rounded-lg p-8 mb-8 flex items-center">
+          <div className="flex-1">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">ברוכים הבאים לקוקי ליזה</h2>
+            <p className="text-lg text-gray-600">מאפים טריים שנעשו באהבה!</p>
+          </div>
+          <div className="ml-8">
+            <Image
+              src="/Liza.jpg"
+              alt="Liza"
+              width={200}
+              height={200}
+              className="rounded-full object-cover"
+            />
+          </div>
         </section>
 
         {/* Cakes Section */}
