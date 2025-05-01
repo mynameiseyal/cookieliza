@@ -26,5 +26,5 @@ jobs:
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }} 
+          VERCEL_ORG_ID: eyal-vs-projects
+          VERCEL_PROJECT_ID: prj_qIQa3birYfZoCDmkvGg6DZwpUjW6 
