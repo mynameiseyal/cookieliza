@@ -1,12 +1,5 @@
 import { create } from 'zustand'
 
-// Instagram post IDs for each product type
-const INSTAGRAM_POSTS = {
-  cake: ['C1', 'C2', 'C3'], // Replace with actual Instagram post IDs
-  cookie: ['K1', 'K2', 'K3'], // Replace with actual Instagram post IDs
-  bread: ['B1', 'B2', 'B3'], // Replace with actual Instagram post IDs
-}
-
 export interface CartItem {
   id: string
   name: string
