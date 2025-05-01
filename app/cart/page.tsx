@@ -1,3 +1,4 @@
+// This is a Next.js client component for the shopping cart page
 'use client';
 
 import { useCartStore } from '../store/cart';
