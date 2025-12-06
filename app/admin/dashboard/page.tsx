@@ -111,13 +111,6 @@ export default function AdminDashboard() {
     },
   ];
 
-  const recentOrders = [
-    { id: '1001', customer: 'שרה כהן', items: 3, total: 349.70, status: 'completed', time: '10:30' },
-    { id: '1002', customer: 'דוד לוי', items: 2, total: 189.80, status: 'pending', time: '11:15' },
-    { id: '1003', customer: 'רחל אברהם', items: 5, total: 524.50, status: 'completed', time: '12:00' },
-    { id: '1004', customer: 'יוסי מזרחי', items: 1, total: 159.90, status: 'processing', time: '13:45' },
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" dir="rtl">
       {/* Admin Header */}
