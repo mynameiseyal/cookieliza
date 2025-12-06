@@ -6,6 +6,7 @@ A modern, accessible e-commerce bakery website built with Next.js 15, React 19, 
 
 ## ✨ Features
 
+### Customer-Facing Features
 - 🎨 **Modern UI/UX** - Beautiful gradient design with smooth animations
 - ♿ **WCAG 2.1 AA Compliant** - Full accessibility support
 - 📱 **Fully Responsive** - Mobile-first design that works on all devices
@@ -15,6 +16,16 @@ A modern, accessible e-commerce bakery website built with Next.js 15, React 19, 
 - 🌐 **RTL Support** - Full Hebrew (עברית) language support
 - ⚡ **Performance Optimized** - Next.js Image optimization and caching
 - 🎯 **SEO Ready** - Comprehensive metadata and Open Graph tags
+
+### Admin Dashboard Features
+- 🔐 **Secure Authentication** - Password-protected admin panel
+- 📈 **Analytics Dashboard** - Key metrics and business insights
+- 🏷️ **Product Management** - View, search, and filter products
+- 📦 **Order Management** - Track and manage customer orders
+- 👥 **Customer Management** - Customer profiles and history
+- 📊 **Reports & Analytics** - Sales data and trends visualization
+
+See [ADMIN_README.md](ADMIN_README.md) for detailed admin documentation.
 
 ## 🚀 Tech Stack
 
@@ -38,6 +49,10 @@ cd cookieliza
 # Install dependencies
 npm install
 
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your configuration
+
 # Run development server
 npm run cookieliza
 # or
@@ -49,6 +64,22 @@ npm run build
 # Start production server
 npm start
 ```
+
+## 🔐 Environment Variables
+
+Create a `.env.local` file in the root directory (copy from `.env.example`):
+
+```env
+# Admin Panel Configuration
+NEXT_PUBLIC_ADMIN_PASSWORD=your-secure-password
+
+# Site Configuration (optional - defaults provided)
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_CONTACT_PHONE=050-123-4567
+NEXT_PUBLIC_CONTACT_EMAIL=info@cookieliza.co.il
+```
+
+**Note**: `.env.local` is ignored by git for security. For deployment to Vercel, set these variables in the Vercel dashboard.
 
 ## 🔧 Environment Variables
 
