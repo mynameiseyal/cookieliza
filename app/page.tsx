@@ -4,61 +4,27 @@ import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useCartStore } from './store/cart';
 import Link from 'next/link';
-
-// Define the image paths for each category
-const PRODUCT_IMAGES = {
-  cake: [
-    '/Cakes/20210327_201219.jpg',
-    '/Cakes/20220617_185816.jpg',
-    '/Cakes/20220925_195313.jpg',
-    '/Cakes/20210115_175132.jpg',
-    '/Cakes/20230714_194746.jpg',
-    '/Cakes/20210316_154216.jpg',
-    '/Cakes/20210115_181048.jpg',
-    '/Cakes/20210219_123623.jpg',
-    '/Cakes/20210327_201124.jpg',
-    '/Cakes/20210327_201419.jpg',
-  ],
-  cookie: [
-    '/Cookies/IMG-20221021-WA0059.jpg',
-    '/Cookies/IMG-20221021-WA0062.jpg',
-    '/Cookies/20221021_155404.jpg',
-    '/Cookies/IMG-20221021-WA0070.jpg',
-    '/Cookies/20210415_165628.jpg',
-    '/Cookies/IMG-20221021-WA0059.jpg',
-    '/Cookies/IMG-20221021-WA0062.jpg',
-    '/Cookies/20221021_155404.jpg',
-    '/Cookies/IMG-20221021-WA0070.jpg',
-    '/Cookies/20210415_165628.jpg',
-  ],
-  bread: [
-    '/Breads/20210720_131623.jpg',
-    '/Breads/20210720_140447.jpg',
-    '/Breads/20210722_082834.jpg',
-    '/Breads/20210724_082425.jpg',
-    '/Breads/20210724_083844.jpg',
-    '/Breads/20210726_200052.jpg',
-    '/Breads/20210726_200244.jpg',
-    '/Breads/20210726_200638.jpg',
-    '/Breads/20240127_173950.jpg',
-    '/Breads/20240217_150100.jpg',
-  ],
-};
+import { getProductsByCategory } from '@/lib/products';
+import toast from 'react-hot-toast';
 
 export default function Home() {
   const { addItem, getTotalItems } = useCartStore();
+  
+  const cakes = getProductsByCategory('cake');
+  const cookies = getProductsByCategory('cookie');
+  const breads = getProductsByCategory('bread');
 
-  const handleAddToCart = (type: 'cake' | 'cookie' | 'bread', index: number, price: number) => {
-    const id = `${type}-${index}`;
-    const name = type === 'cake' ? `עוגה ${index + 1}` : 
-                type === 'cookie' ? `עוגיה ${index + 1}` : 
-                `לחם ${index + 1}`;
-
+  const handleAddToCart = (productId: string, name: string, price: number, image: string) => {
     addItem({
-      id,
+      id: productId,
       name,
       price,
-      instagramPostId: PRODUCT_IMAGES[type][index], // Using the image path instead of Instagram ID
+      instagramPostId: image,
+    });
+    
+    // Show success toast
+    toast.success(`${name} נוסף לעגלה! 🎉`, {
+      duration: 2000,
     });
   };
 
@@ -150,40 +116,39 @@ export default function Home() {
           <div className="relative">
             <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0" role="list" aria-label="רשימת עוגות">
               <div className="flex gap-4 sm:gap-6 pb-4" style={{ minWidth: 'max-content' }}>
-                {[...Array(10)].map((_, i) => {
-                  const price = 159.90 + i * 10;
-                  return (
-                    <article key={i} className="bg-white rounded-2xl shadow-lg overflow-hidden w-64 sm:w-72 flex-shrink-0 card-hover border border-pink-100" role="listitem">
-                      <div className="relative h-48 sm:h-56 overflow-hidden">
-                        <Image
-                          src={PRODUCT_IMAGES.cake[i]}
-                          alt={`עוגה מס' ${i + 1} - עוגה טעימה ומתוקה מיוצרת באהבה במחיר ${price} שקלים`}
-                          fill
-                          className="object-cover transition-transform duration-500 hover:scale-110"
-                        />
-                        <div className="absolute top-4 right-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-bold shadow-lg" aria-label="מוצר חדש">
-                          חדש <span aria-hidden="true">✨</span>
+                {cakes.map((product) => (
+                  <article key={product.id} className="bg-white rounded-2xl shadow-lg overflow-hidden w-64 sm:w-72 flex-shrink-0 card-hover border border-pink-100" role="listitem">
+                    <div className="relative h-48 sm:h-56 overflow-hidden">
+                      <Image
+                        src={product.image}
+                        alt={`${product.name} - ${product.description} במחיר ${product.price} שקלים`}
+                        fill
+                        className="object-cover transition-transform duration-500 hover:scale-110"
+                      />
+                      {product.badge && (
+                        <div className="absolute top-4 right-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-bold shadow-lg" aria-label={`מוצר ${product.badge}`}>
+                          {product.badge} <span aria-hidden="true">✨</span>
                         </div>
+                      )}
+                    </div>
+                    <div className="p-4 sm:p-6">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                      <p className="text-sm sm:text-base text-gray-600 mb-4">{product.description}</p>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                          <span className="sr-only">מחיר: </span>₪{product.price.toFixed(2)}
+                        </p>
+                        <button 
+                          onClick={() => handleAddToCart(product.id, product.name, product.price, product.image)}
+                          className="w-full sm:w-auto bg-gradient-to-r from-pink-600 to-purple-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all transform hover:scale-105 shadow-md font-medium text-sm sm:text-base"
+                          aria-label={`הוסף ${product.name} לעגלה במחיר ${product.price} שקלים`}
+                        >
+                          הוסף לעגלה +
+                        </button>
                       </div>
-                      <div className="p-4 sm:p-6">
-                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">עוגה {i + 1}</h3>
-                        <p className="text-sm sm:text-base text-gray-600 mb-4">עוגה טעימה ומתוקה מיוצרת באהבה</p>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                          <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                            <span className="sr-only">מחיר: </span>₪{price}
-                          </p>
-                          <button 
-                            onClick={() => handleAddToCart('cake', i, price)}
-                            className="w-full sm:w-auto bg-gradient-to-r from-pink-600 to-purple-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all transform hover:scale-105 shadow-md font-medium text-sm sm:text-base"
-                            aria-label={`הוסף עוגה ${i + 1} לעגלה במחיר ${price} שקלים`}
-                          >
-                            הוסף לעגלה +
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
+                    </div>
+                  </article>
+                ))}
               </div>
             </div>
           </div>
@@ -200,41 +165,40 @@ export default function Home() {
           <div className="relative">
             <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0" role="list" aria-label="רשימת עוגיות">
               <div className="flex gap-4 sm:gap-6 pb-4" style={{ minWidth: 'max-content' }}>
-                {[...Array(10)].map((_, i) => {
-                  const price = 44.90 + i * 5;
-                  return (
-                    <article key={i} className="bg-white rounded-2xl shadow-lg overflow-hidden w-64 sm:w-72 flex-shrink-0 card-hover border border-amber-100" role="listitem">
-                      <div className="relative h-48 sm:h-56 overflow-hidden">
-                        <Image
-                          src={PRODUCT_IMAGES.cookie[i]}
-                          alt={`עוגיה מס' ${i + 1} - עוגיה פריכה ומתוקה בדיוק כמו שצריך במחיר ${price} שקלים לתריסר`}
-                          fill
-                          className="object-cover transition-transform duration-500 hover:scale-110"
-                        />
-                        <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-bold shadow-lg" aria-label="מוצר פופולרי">
-                          פופולרי <span aria-hidden="true">🔥</span>
+                {cookies.map((product) => (
+                  <article key={product.id} className="bg-white rounded-2xl shadow-lg overflow-hidden w-64 sm:w-72 flex-shrink-0 card-hover border border-amber-100" role="listitem">
+                    <div className="relative h-48 sm:h-56 overflow-hidden">
+                      <Image
+                        src={product.image}
+                        alt={`${product.name} - ${product.description} במחיר ${product.price} שקלים ${product.unit || ''}`}
+                        fill
+                        className="object-cover transition-transform duration-500 hover:scale-110"
+                      />
+                      {product.badge && (
+                        <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-bold shadow-lg" aria-label={`מוצר ${product.badge}`}>
+                          {product.badge} <span aria-hidden="true">🔥</span>
                         </div>
+                      )}
+                    </div>
+                    <div className="p-4 sm:p-6">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                      <p className="text-sm sm:text-base text-gray-600 mb-4">{product.description}</p>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                          <span className="sr-only">מחיר: </span>₪{product.price.toFixed(2)}
+                          {product.unit && <span className="text-xs sm:text-sm text-gray-500 font-normal">/{product.unit}</span>}
+                        </p>
+                        <button 
+                          onClick={() => handleAddToCart(product.id, product.name, product.price, product.image)}
+                          className="w-full sm:w-auto bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-amber-700 hover:to-orange-700 focus:outline-none focus:ring-4 focus:ring-amber-300 transition-all transform hover:scale-105 shadow-md font-medium text-sm sm:text-base"
+                          aria-label={`הוסף ${product.name} לעגלה במחיר ${product.price} שקלים ${product.unit || ''}`}
+                        >
+                          הוסף לעגלה +
+                        </button>
                       </div>
-                      <div className="p-4 sm:p-6">
-                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">עוגיה {i + 1}</h3>
-                        <p className="text-sm sm:text-base text-gray-600 mb-4">עוגיה פריכה ומתוקה בדיוק כמו שצריך</p>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                          <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                            <span className="sr-only">מחיר: </span>₪{price}
-                            <span className="text-xs sm:text-sm text-gray-500 font-normal">/תריסר</span>
-                          </p>
-                          <button 
-                            onClick={() => handleAddToCart('cookie', i, price)}
-                            className="w-full sm:w-auto bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-amber-700 hover:to-orange-700 focus:outline-none focus:ring-4 focus:ring-amber-300 transition-all transform hover:scale-105 shadow-md font-medium text-sm sm:text-base"
-                            aria-label={`הוסף עוגיה ${i + 1} לעגלה במחיר ${price} שקלים לתריסר`}
-                          >
-                            הוסף לעגלה +
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
+                    </div>
+                  </article>
+                ))}
               </div>
             </div>
           </div>
@@ -251,41 +215,40 @@ export default function Home() {
           <div className="relative">
             <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0" role="list" aria-label="רשימת לחמים">
               <div className="flex gap-4 sm:gap-6 pb-4" style={{ minWidth: 'max-content' }}>
-                {[...Array(10)].map((_, i) => {
-                  const price = 29.90 + i * 3;
-                  return (
-                    <article key={i} className="bg-white rounded-2xl shadow-lg overflow-hidden w-64 sm:w-72 flex-shrink-0 card-hover border border-yellow-100" role="listitem">
-                      <div className="relative h-48 sm:h-56 overflow-hidden">
-                        <Image
-                          src={PRODUCT_IMAGES.bread[i]}
-                          alt={`לחם מס' ${i + 1} - לחם טרי ואיכותי נאפה בבוקר במחיר ${price} שקלים לכיכר`}
-                          fill
-                          className="object-cover transition-transform duration-500 hover:scale-110"
-                        />
-                        <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-bold shadow-lg" aria-label="טרי מהתנור היום">
-                          טרי מהתנור <span aria-hidden="true">🔥</span>
+                {breads.map((product) => (
+                  <article key={product.id} className="bg-white rounded-2xl shadow-lg overflow-hidden w-64 sm:w-72 flex-shrink-0 card-hover border border-yellow-100" role="listitem">
+                    <div className="relative h-48 sm:h-56 overflow-hidden">
+                      <Image
+                        src={product.image}
+                        alt={`${product.name} - ${product.description} במחיר ${product.price} שקלים ${product.unit || ''}`}
+                        fill
+                        className="object-cover transition-transform duration-500 hover:scale-110"
+                      />
+                      {product.badge && (
+                        <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-3 py-1 rounded-full text-xs sm:text-sm font-bold shadow-lg" aria-label={product.badge}>
+                          {product.badge} <span aria-hidden="true">🔥</span>
                         </div>
+                      )}
+                    </div>
+                    <div className="p-4 sm:p-6">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{product.name}</h3>
+                      <p className="text-sm sm:text-base text-gray-600 mb-4">{product.description}</p>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-yellow-600 to-amber-700 bg-clip-text text-transparent">
+                          <span className="sr-only">מחיר: </span>₪{product.price.toFixed(2)}
+                          {product.unit && <span className="text-xs sm:text-sm text-gray-500 font-normal">/{product.unit}</span>}
+                        </p>
+                        <button 
+                          onClick={() => handleAddToCart(product.id, product.name, product.price, product.image)}
+                          className="w-full sm:w-auto bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-yellow-700 hover:to-amber-700 focus:outline-none focus:ring-4 focus:ring-yellow-300 transition-all transform hover:scale-105 shadow-md font-medium text-sm sm:text-base"
+                          aria-label={`הוסף ${product.name} לעגלה במחיר ${product.price} שקלים ${product.unit || ''}`}
+                        >
+                          הוסף לעגלה +
+                        </button>
                       </div>
-                      <div className="p-4 sm:p-6">
-                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">לחם {i + 1}</h3>
-                        <p className="text-sm sm:text-base text-gray-600 mb-4">לחם טרי ואיכותי נאפה בבוקר</p>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                          <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-yellow-600 to-amber-700 bg-clip-text text-transparent">
-                            <span className="sr-only">מחיר: </span>₪{price}
-                            <span className="text-xs sm:text-sm text-gray-500 font-normal">/כיכר</span>
-                          </p>
-                          <button 
-                            onClick={() => handleAddToCart('bread', i, price)}
-                            className="w-full sm:w-auto bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl hover:from-yellow-700 hover:to-amber-700 focus:outline-none focus:ring-4 focus:ring-yellow-300 transition-all transform hover:scale-105 shadow-md font-medium text-sm sm:text-base"
-                            aria-label={`הוסף לחם ${i + 1} לעגלה במחיר ${price} שקלים לכיכר`}
-                          >
-                            הוסף לעגלה +
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
+                    </div>
+                  </article>
+                ))}
               </div>
             </div>
           </div>

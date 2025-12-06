@@ -5,9 +5,23 @@ import { useCartStore } from '../store/cart';
 import Image from 'next/image';
 import { MinusIcon, PlusIcon, TrashIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice } = useCartStore();
+
+  const handleRemoveItem = (id: string, name: string) => {
+    removeItem(id);
+    toast.success(`${name} הוסר מהעגלה`);
+  };
+
+  const handleUpdateQuantity = (id: string, quantity: number, name: string) => {
+    if (quantity === 0) {
+      handleRemoveItem(id, name);
+    } else {
+      updateQuantity(id, quantity);
+    }
+  };
 
   if (getTotalItems() === 0) {
     return (
@@ -86,7 +100,7 @@ export default function CartPage() {
                       <div className="flex items-center justify-between mt-3 sm:hidden">
                         <div className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1.5" role="group" aria-label={`שינוי כמות ${item.name}`}>
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity - 1, item.name)}
                             className="p-1 text-gray-600 hover:text-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-600 hover:bg-white rounded-full transition-all"
                             aria-label={`הפחת כמות של ${item.name}`}
                           >
@@ -96,7 +110,7 @@ export default function CartPage() {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item.name)}
                             className="p-1 text-gray-600 hover:text-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-600 hover:bg-white rounded-full transition-all"
                             aria-label={`הוסף כמות של ${item.name}`}
                           >
@@ -113,7 +127,7 @@ export default function CartPage() {
                     {/* Desktop: Quantity controls */}
                     <div className="hidden sm:flex items-center gap-3 bg-gray-100 rounded-full px-4 py-2" role="group" aria-label={`שינוי כמות ${item.name}`}>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity - 1, item.name)}
                         className="p-2 text-gray-600 hover:text-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-600 hover:bg-white rounded-full transition-all"
                         aria-label={`הפחת כמות של ${item.name}`}
                       >
@@ -123,7 +137,7 @@ export default function CartPage() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item.name)}
                         className="p-2 text-gray-600 hover:text-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-600 hover:bg-white rounded-full transition-all"
                         aria-label={`הוסף כמות של ${item.name}`}
                       >
@@ -139,7 +153,7 @@ export default function CartPage() {
                     </div>
                     
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => handleRemoveItem(item.id, item.name)}
                       className="p-2 sm:p-3 text-gray-400 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 hover:bg-red-50 rounded-full transition-all flex-shrink-0"
                       aria-label={`הסר ${item.name} מהעגלה`}
                     >
