@@ -304,8 +304,8 @@ export default function CartPage() {
                   <h3 className="text-lg font-bold text-gray-900">פרטי איש קשר</h3>
                   
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      שם מלא <span className="text-red-500">*</span>
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-2">
+                      שם מלא <span className="text-red-600">*</span>
                     </label>
                     <input
                       type="text"
@@ -313,15 +313,15 @@ export default function CartPage() {
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all"
+                      className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all placeholder:text-gray-600"
                       placeholder="שם פרטי ומשפחה"
                       disabled={isSubmitting}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                      טלפון <span className="text-red-500">*</span>
+                    <label htmlFor="phone" className="block text-sm font-semibold text-gray-900 mb-2">
+                      טלפון <span className="text-red-600">*</span>
                     </label>
                     <input
                       type="tel"
@@ -329,15 +329,15 @@ export default function CartPage() {
                       required
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all"
+                      className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all placeholder:text-gray-600"
                       placeholder="050-123-4567"
                       disabled={isSubmitting}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                      אימייל <span className="text-red-500">*</span>
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-900 mb-2">
+                      אימייל <span className="text-red-600">*</span>
                     </label>
                     <input
                       type="email"
@@ -345,15 +345,15 @@ export default function CartPage() {
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all"
+                      className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all placeholder:text-gray-600"
                       placeholder="example@email.com"
                       disabled={isSubmitting}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                      כתובת למשלוח <span className="text-red-500">*</span>
+                    <label htmlFor="address" className="block text-sm font-semibold text-gray-900 mb-2">
+                      כתובת למשלוח <span className="text-red-600">*</span>
                     </label>
                     <input
                       type="text"
@@ -361,14 +361,14 @@ export default function CartPage() {
                       required
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all"
+                      className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all placeholder:text-gray-600"
                       placeholder="רחוב, מספר, עיר"
                       disabled={isSubmitting}
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="notes" className="block text-sm font-semibold text-gray-900 mb-2">
                       הערות (אופציונלי)
                     </label>
                     <textarea
@@ -376,7 +376,7 @@ export default function CartPage() {
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all resize-none"
+                      className="w-full px-4 py-3 text-gray-900 bg-white border-2 border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all resize-none placeholder:text-gray-600"
                       placeholder="הקדשה, הוראות מיוחדות למשלוח..."
                       disabled={isSubmitting}
                     />
