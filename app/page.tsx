@@ -105,6 +105,96 @@ export default function Home() {
           </div>
         </section>
 
+        {/* About Section */}
+        <section id="about" className="mb-12 sm:mb-16 scroll-mt-24" aria-labelledby="about-heading">
+          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-pink-100">
+            <div className="bg-gradient-to-r from-pink-500 via-pink-400 to-purple-500 p-6 sm:p-8">
+              <h2 id="about-heading" className="text-3xl sm:text-4xl font-bold text-white text-center drop-shadow-lg">
+                נעים מאוד, אני ליזה ווסק 🍰
+              </h2>
+            </div>
+            
+            <div className="p-6 sm:p-8 lg:p-12 space-y-6 text-gray-800 leading-relaxed">
+              <p className="text-base sm:text-lg">
+                ביולוגית ביום, אמא לארבעה בנים שובבים 24/7, ואופה עם אהבה לבצקים, שוקולד ולקציפה שמגיעה בדיוק למרקם הנכון – כבר יותר מ־20 שנה.
+              </p>
+
+              <div className="border-r-4 border-pink-400 pr-4 sm:pr-6 bg-pink-50 p-4 rounded-r-lg">
+                <p className="text-base sm:text-lg font-semibold text-pink-900">
+                  האמת? הכל התחיל כתחביב קטן.
+                </p>
+                <p className="text-sm sm:text-base text-gray-700 mt-2">
+                  משהו בין "נראה לי שאנסה מתכון חדש" לבין "טוב, אולי לא הייתי אמורה לאפות שלוש עוגות בשתיים בלילה".
+                </p>
+              </div>
+
+              <p className="text-base sm:text-lg">
+                אבל אז החברים ביקשו, אחריהם החברים של החברים, ובשלב מסוים גם אנשים שאני אפילו לא מכירה - ואז הבנתי שמשהו טוב קורה כאן.
+              </p>
+
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 sm:p-8">
+                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-6">
+                  מה חשוב לי?
+                </h3>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <span className="text-2xl flex-shrink-0">✨</span>
+                    <div>
+                      <p className="font-bold text-gray-900">שיהיה טעים באמת</p>
+                      <p className="text-sm sm:text-base text-gray-700">בלי קיצורי דרך ובלי פשרות</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-2xl flex-shrink-0">🎨</span>
+                    <div>
+                      <p className="font-bold text-gray-900">שיהיה יפה</p>
+                      <p className="text-sm sm:text-base text-gray-700">כי קינוח טוב מתחיל בעיניים</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-2xl flex-shrink-0">🎁</span>
+                    <div>
+                      <p className="font-bold text-gray-900">שיתאים בדיוק למזמין</p>
+                      <p className="text-sm sm:text-base text-gray-700">מעוגה מפוארת ועד "פשוט מתחשק לי משהו מתוק"</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-4">
+                  איך הגעתי לכאן?
+                </h3>
+                <p className="text-base sm:text-lg">
+                  הרבה ניסוי וטעייה, מאות מתכונים, כמות לא הגיונית של קמח על הרצפה, ובקשות בלתי-נגמרות להפוך את כל זה למשהו רשמי.
+                  אז הנה אני – עם אתר, עם אהבה גדולה, ועם מטרה אחת: להפוך כל אירוע (או יום שלישי רגיל) למתוק ושמח יותר.
+                </p>
+              </div>
+
+              <div className="border-t-2 border-b-2 border-pink-200 py-6 my-6">
+                <h3 className="text-xl sm:text-2xl font-bold text-pink-600 mb-3 text-center">
+                  ואם תשאלו אותי
+                </h3>
+                <p className="text-base sm:text-lg text-center italic text-gray-700">
+                  אפייה היא לא רק מתכון.<br />
+                  היא רגש, היא יצירתיות, והיא נגיעה קטנה של קסם שעוברת מביס לביס.
+                </p>
+              </div>
+
+              <div className="text-center">
+                <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                  המסע המתוק־מלוח שלכם מתחיל כאן. ❤️
+                </p>
+                <div className="mt-6">
+                  <a href="#cakes" className="inline-block bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-4 rounded-full font-bold hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all transform hover:scale-105 shadow-lg">
+                    התחילו להזמין עכשיו 🛒
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Cakes Section */}
         <section id="cakes" className="mb-12 sm:mb-16 scroll-mt-24" aria-labelledby="cakes-heading">
           <div className="flex items-center justify-between mb-6 sm:mb-8">
