@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAdminSession, clearAdminSession } from '@/lib/auth';
 import { PRODUCTS, Product } from '@/lib/products';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -17,40 +16,23 @@ import {
 import toast from 'react-hot-toast';
 
 export default function AdminProducts() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<'all' | 'cake' | 'cookie' | 'bread'>('all');
   const router = useRouter();
 
-  useEffect(() => {
-    const authenticated = getAdminSession();
-    if (!authenticated) {
-      toast.error('יש להתחבר תחילה');
+  const handleLogout = async () => {
+    try {
+      // Call logout API to clear HTTP-only cookie
+      await fetch('/api/admin/auth', {
+        method: 'DELETE',
+      });
+      toast.success('התנתקת בהצלחה');
       router.push('/admin');
-    } else {
-      setIsAuthenticated(true);
+    } catch (error) {
+      console.error('Logout error:', error);
+      router.push('/admin');
     }
-    setIsLoading(false);
-  }, [router]);
-
-  const handleLogout = () => {
-    clearAdminSession();
-    toast.success('התנתקת בהצלחה');
-    router.push('/admin');
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   // Filter products
   const filteredProducts = PRODUCTS.filter(product => {
