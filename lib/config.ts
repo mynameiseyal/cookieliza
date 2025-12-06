@@ -20,6 +20,9 @@ export const SITE_CONFIG = {
     currency: '₪',
     currencySymbol: '₪',
   },
+  admin: {
+    defaultPassword: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'cookie2010',
+  },
 } as const;
 
 export const NAV_LINKS = [
