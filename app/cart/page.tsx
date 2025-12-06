@@ -3,19 +3,24 @@
 
 import { useCartStore } from '../store/cart';
 import { useOrdersStore } from '@/lib/orders';
+import { createPaymentProvider } from '@/lib/payment/providers';
+import type { CreditCardData, PaymentMethod } from '@/lib/payment/types';
 import Image from 'next/image';
 import { MinusIcon, PlusIcon, TrashIcon, ArrowRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import CreditCardForm from '@/components/CreditCardForm';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCartStore();
   const { addOrder } = useOrdersStore();
   const router = useRouter();
   const [showCheckout, setShowCheckout] = useState(false);
+  const [checkoutStep, setCheckoutStep] = useState<'details' | 'payment'>('details');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cardData, setCardData] = useState<CreditCardData | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -37,36 +42,90 @@ export default function CartPage() {
     }
   };
 
-  const handleCheckout = (e: React.FormEvent) => {
+  const handleNextStep = () => {
+    // Validate customer details
+    if (!formData.name || !formData.phone || !formData.email || !formData.address) {
+      toast.error('אנא מלא את כל השדות הנדרשים');
+      return;
+    }
+    setCheckoutStep('payment');
+  };
+
+  const handleBackToDetails = () => {
+    setCheckoutStep('details');
+  };
+
+  const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!cardData) {
+      toast.error('אנא מלא את פרטי כרטיס האשראי');
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Create order
-    const order = {
-      customer: {
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        address: formData.address,
-      },
-      items: items.map(item => ({
-        productId: item.id,
-        productName: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        image: item.instagramPostId,
-      })),
-      total: getTotalPrice(),
-      notes: formData.notes || undefined,
-    };
+    try {
+      // Process payment using test provider
+      const paymentProvider = createPaymentProvider('test');
+      
+      const paymentRequest = {
+        amount: getTotalPrice(),
+        currency: 'ILS',
+        orderId: `temp-${Date.now()}`,
+        customer: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+        },
+        paymentMethod: {
+          provider: 'test' as const,
+          type: 'credit_card' as const,
+          last4: cardData.cardNumber.slice(-4),
+          brand: cardData.cardNumber.startsWith('4') ? 'Visa' : 'Mastercard',
+        },
+        cardData,
+      };
 
-    // Simulate processing
-    setTimeout(() => {
+      const paymentResponse = await paymentProvider.processPayment(paymentRequest);
+
+      if (!paymentResponse.success) {
+        toast.error(`❌ תשלום נכשל: ${paymentResponse.error}`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Payment successful - create order
+      const order = {
+        customer: {
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          address: formData.address,
+        },
+        items: items.map(item => ({
+          productId: item.id,
+          productName: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          image: item.instagramPostId,
+        })),
+        total: getTotalPrice(),
+        notes: formData.notes || undefined,
+        payment: {
+          method: paymentRequest.paymentMethod,
+          transactionId: paymentResponse.transactionId,
+          paidAt: paymentResponse.timestamp,
+        },
+      };
+
       addOrder(order);
       clearCart();
       setIsSubmitting(false);
       setShowCheckout(false);
-      toast.success('🎉 ההזמנה בוצעה בהצלחה! נחזור אליך בהקדם.');
+      setCheckoutStep('details');
+      
+      toast.success('🎉 התשלום בוצע בהצלחה! ההזמנה נקלטה במערכת.');
       
       // Reset form
       setFormData({
@@ -76,12 +135,17 @@ export default function CartPage() {
         address: '',
         notes: '',
       });
+      setCardData(null);
 
       // Redirect to home after 2 seconds
       setTimeout(() => {
         router.push('/');
       }, 2000);
-    }, 1500);
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('❌ אירעה שגיאה בעיבוד התשלום. נסה שוב.');
+      setIsSubmitting(false);
+    }
   };
 
   if (getTotalItems() === 0) {
@@ -285,23 +349,31 @@ export default function CartPage() {
         {showCheckout && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => !isSubmitting && setShowCheckout(false)}>
             <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} dir="rtl">
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-3xl">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                  השלמת הזמנה
-                </h2>
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-3xl z-10">
+                <div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                    {checkoutStep === 'details' ? 'השלמת הזמנה' : 'פרטי תשלום'}
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    שלב {checkoutStep === 'details' ? '1' : '2'} מתוך 2
+                  </p>
+                </div>
                 <button
                   onClick={() => !isSubmitting && setShowCheckout(false)}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                   disabled={isSubmitting}
+                  aria-label="סגור"
                 >
                   <XMarkIcon className="h-6 w-6 text-gray-600" />
                 </button>
               </div>
 
-              <form onSubmit={handleCheckout} className="p-6 space-y-6">
-                {/* Customer Information */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-gray-900">פרטי איש קשר</h3>
+              <form onSubmit={checkoutStep === 'details' ? (e) => { e.preventDefault(); handleNextStep(); } : handleCheckout} className="p-6 space-y-6">
+                {checkoutStep === 'details' ? (
+                  <>
+                    {/* Customer Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-bold text-gray-900">פרטי איש קשר</h3>
                   
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-gray-900 mb-2">
@@ -380,48 +452,75 @@ export default function CartPage() {
                       placeholder="הקדשה, הוראות מיוחדות למשלוח..."
                       disabled={isSubmitting}
                     />
-                  </div>
-                </div>
-
-                {/* Order Summary */}
-                <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">סיכום הזמנה</h3>
-                  {items.map(item => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span className="text-gray-600">{item.name} x{item.quantity}</span>
-                      <span className="font-semibold text-gray-900">₪{(item.price * item.quantity).toFixed(2)}</span>
                     </div>
-                  ))}
-                  <div className="border-t border-gray-300 pt-2 mt-2">
-                    <div className="flex justify-between font-bold text-lg">
-                      <span>סה&quot;כ לתשלום:</span>
-                      <span className="text-pink-600">₪{getTotalPrice().toFixed(2)}</span>
+                    
+                    {/* Next Button */}
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowCheckout(false)}
+                        disabled={isSubmitting}
+                        className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ביטול
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        המשך לתשלום →
+                      </button>
                     </div>
-                  </div>
-                </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Payment Step */}
+                    <CreditCardForm 
+                      onCardDataChange={setCardData}
+                      isSubmitting={isSubmitting}
+                    />
+                    {/* Order Summary */}
+                    <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
+                      <h3 className="text-lg font-bold text-gray-900 mb-3">סיכום הזמנה</h3>
+                      {items.map(item => (
+                        <div key={item.id} className="flex justify-between text-sm">
+                          <span className="text-gray-600">{item.name} x{item.quantity}</span>
+                          <span className="font-semibold text-gray-900">₪{(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                      ))}
+                      <div className="border-t border-gray-300 pt-2 mt-2">
+                        <div className="flex justify-between font-bold text-lg">
+                          <span>סה&quot;כ לתשלום:</span>
+                          <span className="text-pink-600">₪{getTotalPrice().toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
 
-                {/* Submit Button */}
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowCheckout(false)}
-                    disabled={isSubmitting}
-                    className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    ביטול
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? 'מבצע הזמנה...' : 'אישור ותשלום'}
-                  </button>
-                </div>
+                    {/* Submit Button */}
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={handleBackToDetails}
+                        disabled={isSubmitting}
+                        className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ← חזור
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting || !cardData}
+                        className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 rounded-xl hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSubmitting ? 'מעבד תשלום...' : `שלם ₪${getTotalPrice().toFixed(2)}`}
+                      </button>
+                    </div>
 
-                <p className="text-xs text-gray-500 text-center">
-                  לאחר אישור ההזמנה, נחזור אליך לתיאום פרטי התשלום והמשלוח
-                </p>
+                    <p className="text-xs text-gray-500 text-center">
+                      התשלום מאובטח ומוצפן. לא נשמור את פרטי הכרטיס שלך.
+                    </p>
+                  </>
+                )}
               </form>
             </div>
           </div>

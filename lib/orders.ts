@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import type { PaymentMethod } from './payment/types'
 
 export interface OrderItem {
   productId: string
@@ -24,6 +25,11 @@ export interface Order {
   orderDate: string
   deliveryDate?: string
   notes?: string
+  payment?: {
+    method: PaymentMethod
+    transactionId?: string
+    paidAt?: string
+  }
 }
 
 interface OrdersStore {
