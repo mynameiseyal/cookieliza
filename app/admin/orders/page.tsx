@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAdminSession, clearAdminSession } from '@/lib/auth';
+import { useOrdersStore } from '@/lib/orders';
 import Link from 'next/link';
 import {
   ArrowRightOnRectangleIcon,
@@ -12,33 +13,14 @@ import {
   EyeIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-
-interface Order {
-  id: string;
-  orderNumber: string;
-  customer: {
-    name: string;
-    phone: string;
-    email: string;
-    address: string;
-  };
-  items: {
-    productName: string;
-    quantity: number;
-    price: number;
-  }[];
-  total: number;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
-  orderDate: string;
-  deliveryDate?: string;
-  notes?: string;
-}
+import type { Order } from '@/lib/orders';
 
 export default function AdminOrders() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<'all' | Order['status']>('all');
   const router = useRouter();
+  const { getAllOrders, getOrdersByStatus, updateOrderStatus } = useOrdersStore();
 
   useEffect(() => {
     const authenticated = getAdminSession();
@@ -69,84 +51,17 @@ export default function AdminOrders() {
     return null;
   }
 
-  // Mock orders data
-  const mockOrders: Order[] = [
-    {
-      id: '1',
-      orderNumber: 'ORD-1001',
-      customer: {
-        name: 'שרה כהן',
-        phone: '052-1234567',
-        email: 'sarah@example.com',
-        address: 'רחוב הרצל 45, תל אביב',
-      },
-      items: [
-        { productName: 'עוגת שוקולד מפנקת', quantity: 1, price: 159.90 },
-        { productName: 'עוגיות שוקולד צ\'יפס', quantity: 2, price: 44.90 },
-      ],
-      total: 249.70,
-      status: 'completed',
-      orderDate: '2025-12-06 10:30',
-      deliveryDate: '2025-12-06 15:00',
-    },
-    {
-      id: '2',
-      orderNumber: 'ORD-1002',
-      customer: {
-        name: 'דוד לוי',
-        phone: '054-9876543',
-        email: 'david@example.com',
-        address: 'שדרות ירושלים 12, חיפה',
-      },
-      items: [
-        { productName: 'חלה ביתית', quantity: 3, price: 29.90 },
-        { productName: 'לחם מחמצת', quantity: 2, price: 32.90 },
-      ],
-      total: 155.50,
-      status: 'processing',
-      orderDate: '2025-12-06 11:15',
-      deliveryDate: '2025-12-07 09:00',
-    },
-    {
-      id: '3',
-      orderNumber: 'ORD-1003',
-      customer: {
-        name: 'רחל אברהם',
-        phone: '050-5555555',
-        email: 'rachel@example.com',
-        address: 'רחוב דיזנגוף 100, תל אביב',
-      },
-      items: [
-        { productName: 'עוגת וניל קלאסית', quantity: 1, price: 169.90 },
-        { productName: 'עוגת גבינה אפויה', quantity: 1, price: 179.90 },
-        { productName: 'עוגיות חמאה דניות', quantity: 3, price: 49.90 },
-      ],
-      total: 499.50,
-      status: 'pending',
-      orderDate: '2025-12-06 12:00',
-      notes: 'בבקשה להוסיף הקדשה: "מזל טוב!"',
-    },
-    {
-      id: '4',
-      orderNumber: 'ORD-1004',
-      customer: {
-        name: 'יוסי מזרחי',
-        phone: '053-7777777',
-        email: 'yossi@example.com',
-        address: 'רחוב אלנבי 25, תל אביב',
-      },
-      items: [
-        { productName: 'עוגת טירמיסו', quantity: 1, price: 199.90 },
-      ],
-      total: 199.90,
-      status: 'cancelled',
-      orderDate: '2025-12-06 13:45',
-    },
-  ];
+  // Get real orders
+  const allOrders = getAllOrders();
+  const filteredOrders = filterStatus === 'all' 
+    ? allOrders 
+    : getOrdersByStatus(filterStatus);
 
-  const filteredOrders = mockOrders.filter(order => 
-    filterStatus === 'all' || order.status === filterStatus
-  );
+  const handleStatusChange = (orderId: string, orderNumber: string, newStatus: Order['status']) => {
+    updateOrderStatus(orderId, newStatus);
+    const statusText = getStatusText(newStatus);
+    toast.success(`הזמנה ${orderNumber} עודכנה ל-${statusText}`);
+  };
 
   const getStatusIcon = (status: Order['status']) => {
     switch (status) {
@@ -220,7 +135,7 @@ export default function AdminOrders() {
                 : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
-            הכל ({mockOrders.length})
+            הכל ({allOrders.length})
           </button>
           <button
             onClick={() => setFilterStatus('pending')}
@@ -230,7 +145,7 @@ export default function AdminOrders() {
                 : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
-            ממתינות ({mockOrders.filter(o => o.status === 'pending').length})
+            ממתינות ({getOrdersByStatus('pending').length})
           </button>
           <button
             onClick={() => setFilterStatus('processing')}
@@ -240,7 +155,7 @@ export default function AdminOrders() {
                 : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
-            בטיפול ({mockOrders.filter(o => o.status === 'processing').length})
+            בטיפול ({getOrdersByStatus('processing').length})
           </button>
           <button
             onClick={() => setFilterStatus('completed')}
@@ -250,7 +165,7 @@ export default function AdminOrders() {
                 : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
-            הושלמו ({mockOrders.filter(o => o.status === 'completed').length})
+            הושלמו ({getOrdersByStatus('completed').length})
           </button>
         </div>
 
@@ -321,13 +236,13 @@ export default function AdminOrders() {
                 {order.status === 'pending' && (
                   <>
                     <button
-                      onClick={() => toast.success(`הזמנה ${order.orderNumber} סומנה כבטיפול`)}
+                      onClick={() => handleStatusChange(order.id, order.orderNumber, 'processing')}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                     >
                       סמן כבטיפול
                     </button>
                     <button
-                      onClick={() => toast.error(`הזמנה ${order.orderNumber} בוטלה`)}
+                      onClick={() => handleStatusChange(order.id, order.orderNumber, 'cancelled')}
                       className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
                     >
                       בטל הזמנה
@@ -336,7 +251,7 @@ export default function AdminOrders() {
                 )}
                 {order.status === 'processing' && (
                   <button
-                    onClick={() => toast.success(`הזמנה ${order.orderNumber} הושלמה! 🎉`)}
+                    onClick={() => handleStatusChange(order.id, order.orderNumber, 'completed')}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
                   >
                     סמן כהושלם

@@ -2,13 +2,27 @@
 'use client';
 
 import { useCartStore } from '../store/cart';
+import { useOrdersStore } from '@/lib/orders';
 import Image from 'next/image';
-import { MinusIcon, PlusIcon, TrashIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { MinusIcon, PlusIcon, TrashIcon, ArrowRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice } = useCartStore();
+  const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice, clearCart } = useCartStore();
+  const { addOrder } = useOrdersStore();
+  const router = useRouter();
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    notes: '',
+  });
 
   const handleRemoveItem = (id: string, name: string) => {
     removeItem(id);
@@ -21,6 +35,53 @@ export default function CartPage() {
     } else {
       updateQuantity(id, quantity);
     }
+  };
+
+  const handleCheckout = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Create order
+    const order = {
+      customer: {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        address: formData.address,
+      },
+      items: items.map(item => ({
+        productId: item.id,
+        productName: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.instagramPostId,
+      })),
+      total: getTotalPrice(),
+      notes: formData.notes || undefined,
+    };
+
+    // Simulate processing
+    setTimeout(() => {
+      addOrder(order);
+      clearCart();
+      setIsSubmitting(false);
+      setShowCheckout(false);
+      toast.success('🎉 ההזמנה בוצעה בהצלחה! נחזור אליך בהקדם.');
+      
+      // Reset form
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: '',
+      });
+
+      // Redirect to home after 2 seconds
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
+    }, 1500);
   };
 
   if (getTotalItems() === 0) {
@@ -192,7 +253,10 @@ export default function CartPage() {
                   </div>
                 </div>
                 
-                <button className="w-full bg-white text-pink-600 py-3 sm:py-4 rounded-xl sm:rounded-2xl hover:bg-pink-50 focus:outline-none focus:ring-4 focus:ring-white/50 transition-all transform hover:scale-105 shadow-lg font-bold text-base sm:text-lg">
+                <button 
+                  onClick={() => setShowCheckout(true)}
+                  className="w-full bg-white text-pink-600 py-3 sm:py-4 rounded-xl sm:rounded-2xl hover:bg-pink-50 focus:outline-none focus:ring-4 focus:ring-white/50 transition-all transform hover:scale-105 shadow-lg font-bold text-base sm:text-lg"
+                >
                   המשך לתשלום <span aria-hidden="true">💳</span>
                 </button>
                 
@@ -216,6 +280,152 @@ export default function CartPage() {
             </div>
           </aside>
         </div>
+
+        {/* Checkout Modal */}
+        {showCheckout && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => !isSubmitting && setShowCheckout(false)}>
+            <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} dir="rtl">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-3xl">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                  השלמת הזמנה
+                </h2>
+                <button
+                  onClick={() => !isSubmitting && setShowCheckout(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  disabled={isSubmitting}
+                >
+                  <XMarkIcon className="h-6 w-6 text-gray-600" />
+                </button>
+              </div>
+
+              <form onSubmit={handleCheckout} className="p-6 space-y-6">
+                {/* Customer Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-900">פרטי איש קשר</h3>
+                  
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                      שם מלא <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all"
+                      placeholder="שם פרטי ומשפחה"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                      טלפון <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      required
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all"
+                      placeholder="050-123-4567"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      אימייל <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all"
+                      placeholder="example@email.com"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+                      כתובת למשלוח <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="address"
+                      required
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all"
+                      placeholder="רחוב, מספר, עיר"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+                      הערות (אופציונלי)
+                    </label>
+                    <textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      rows={3}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all resize-none"
+                      placeholder="הקדשה, הוראות מיוחדות למשלוח..."
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                </div>
+
+                {/* Order Summary */}
+                <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">סיכום הזמנה</h3>
+                  {items.map(item => (
+                    <div key={item.id} className="flex justify-between text-sm">
+                      <span className="text-gray-600">{item.name} x{item.quantity}</span>
+                      <span className="font-semibold text-gray-900">₪{(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                  <div className="border-t border-gray-300 pt-2 mt-2">
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>סה&quot;כ לתשלום:</span>
+                      <span className="text-pink-600">₪{getTotalPrice().toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowCheckout(false)}
+                    disabled={isSubmitting}
+                    className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    ביטול
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'מבצע הזמנה...' : 'אישור ותשלום'}
+                  </button>
+                </div>
+
+                <p className="text-xs text-gray-500 text-center">
+                  לאחר אישור ההזמנה, נחזור אליך לתיאום פרטי התשלום והמשלוח
+                </p>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

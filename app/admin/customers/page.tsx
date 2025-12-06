@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAdminSession, clearAdminSession } from '@/lib/auth';
+import { useOrdersStore, getCustomersFromOrders } from '@/lib/orders';
 import Link from 'next/link';
 import {
   ArrowRightOnRectangleIcon,
@@ -13,23 +14,12 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  totalOrders: number;
-  totalSpent: number;
-  lastOrderDate: string;
-  status: 'active' | 'inactive';
-}
-
 export default function AdminCustomers() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+  const { getAllOrders } = useOrdersStore();
 
   useEffect(() => {
     const authenticated = getAdminSession();
@@ -60,59 +50,17 @@ export default function AdminCustomers() {
     return null;
   }
 
-  // Mock customer data
-  const mockCustomers: Customer[] = [
-    {
-      id: '1',
-      name: 'שרה כהן',
-      email: 'sarah@example.com',
-      phone: '052-1234567',
-      address: 'רחוב הרצל 45, תל אביב',
-      totalOrders: 12,
-      totalSpent: 3450.80,
-      lastOrderDate: '2025-12-06',
-      status: 'active',
-    },
-    {
-      id: '2',
-      name: 'דוד לוי',
-      email: 'david@example.com',
-      phone: '054-9876543',
-      address: 'שדרות ירושלים 12, חיפה',
-      totalOrders: 8,
-      totalSpent: 1890.50,
-      lastOrderDate: '2025-12-05',
-      status: 'active',
-    },
-    {
-      id: '3',
-      name: 'רחל אברהם',
-      email: 'rachel@example.com',
-      phone: '050-5555555',
-      address: 'רחוב דיזנגוף 100, תל אביב',
-      totalOrders: 25,
-      totalSpent: 7250.90,
-      lastOrderDate: '2025-12-06',
-      status: 'active',
-    },
-    {
-      id: '4',
-      name: 'יוסי מזרחי',
-      email: 'yossi@example.com',
-      phone: '053-7777777',
-      address: 'רחוב אלנבי 25, תל אביב',
-      totalOrders: 5,
-      totalSpent: 1120.40,
-      lastOrderDate: '2025-11-28',
-      status: 'inactive',
-    },
-  ];
+  // Get real customers from orders
+  const allOrders = getAllOrders();
+  const customers = getCustomersFromOrders(allOrders);
 
-  const filteredCustomers = mockCustomers.filter(customer =>
+  const filteredCustomers = customers.filter(customer =>
     customer.name.includes(searchQuery) ||
     customer.email.includes(searchQuery) ||
     customer.phone.includes(searchQuery)
   );
+
+  const totalRevenue = customers.reduce((sum, c) => sum + c.totalSpent, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" dir="rtl">
@@ -160,18 +108,18 @@ export default function AdminCustomers() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
             <p className="text-gray-600 text-sm mb-1">סך הכל לקוחות</p>
-            <p className="text-3xl font-bold text-gray-900">{mockCustomers.length}</p>
+            <p className="text-3xl font-bold text-gray-900">{customers.length}</p>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
             <p className="text-gray-600 text-sm mb-1">לקוחות פעילים</p>
             <p className="text-3xl font-bold text-green-600">
-              {mockCustomers.filter(c => c.status === 'active').length}
+              {customers.filter(c => c.status === 'active').length}
             </p>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
             <p className="text-gray-600 text-sm mb-1">סה&quot;כ הכנסות</p>
             <p className="text-3xl font-bold text-pink-600">
-              ₪{mockCustomers.reduce((sum, c) => sum + c.totalSpent, 0).toLocaleString()}
+              ₪{totalRevenue.toLocaleString('he-IL', { minimumFractionDigits: 2 })}
             </p>
           </div>
         </div>
@@ -214,20 +162,22 @@ export default function AdminCustomers() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-pink-600">{customer.totalOrders}</p>
-                  <p className="text-xs text-gray-600">הזמנות</p>
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-pink-600">{customer.totalOrders}</p>
+                    <p className="text-xs text-gray-600">הזמנות</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-600">₪{customer.totalSpent.toLocaleString('he-IL', { minimumFractionDigits: 2 })}</p>
+                    <p className="text-xs text-gray-600">סה&quot;כ רכישות</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {new Date(customer.lastOrderDate).toLocaleDateString('he-IL')}
+                    </p>
+                    <p className="text-xs text-gray-600">הזמנה אחרונה</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-purple-600">₪{customer.totalSpent.toLocaleString()}</p>
-                  <p className="text-xs text-gray-600">סה&quot;כ רכישות</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-semibold text-gray-900">{customer.lastOrderDate}</p>
-                  <p className="text-xs text-gray-600">הזמנה אחרונה</p>
-                </div>
-              </div>
             </div>
           ))}
         </div>

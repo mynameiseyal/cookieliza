@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAdminSession, clearAdminSession } from '@/lib/auth';
 import { PRODUCTS, getProductsByCategory } from '@/lib/products';
+import { useOrdersStore } from '@/lib/orders';
 import Link from 'next/link';
 import {
   ShoppingBagIcon,
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { getTodayOrders, getMonthlyOrders, getTotalRevenue, getAllOrders, getOrdersByStatus } = useOrdersStore();
 
   useEffect(() => {
     const authenticated = getAdminSession();
@@ -54,26 +56,40 @@ export default function AdminDashboard() {
   const cookies = getProductsByCategory('cookie');
   const breads = getProductsByCategory('bread');
   
+  // Real data from orders store
+  const allOrders = getAllOrders();
+  const todayOrders = getTodayOrders();
+  const monthlyOrders = getMonthlyOrders();
   const totalProducts = PRODUCTS.length;
   const inStockProducts = PRODUCTS.filter(p => p.inStock).length;
-  const totalRevenue = 12450.50; // Mock data
-  const todayOrders = 8; // Mock data
-  const monthlyOrders = 156; // Mock data
+  const totalRevenue = getTotalRevenue();
+  const todayOrdersCount = todayOrders.length;
+  const monthlyOrdersCount = monthlyOrders.length;
+
+  // Get recent orders (last 4)
+  const recentOrders = allOrders.slice(0, 4).map(order => ({
+    id: order.orderNumber,
+    customer: order.customer.name,
+    items: order.items.length,
+    total: order.total,
+    status: order.status,
+    time: new Date(order.orderDate).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
+  }));
 
   const stats = [
     {
       name: 'הזמנות היום',
-      value: todayOrders,
+      value: todayOrdersCount,
       icon: ShoppingBagIcon,
-      change: '+12%',
+      change: todayOrdersCount > 0 ? `+${todayOrdersCount}` : '0',
       changeType: 'positive',
       color: 'from-blue-500 to-blue-600',
     },
     {
       name: 'הכנסות החודש',
-      value: `₪${totalRevenue.toLocaleString()}`,
+      value: `₪${totalRevenue.toLocaleString('he-IL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: CurrencyDollarIcon,
-      change: '+23%',
+      change: totalRevenue > 0 ? '+' : '0%',
       changeType: 'positive',
       color: 'from-green-500 to-green-600',
     },
@@ -81,15 +97,15 @@ export default function AdminDashboard() {
       name: 'מוצרים במלאי',
       value: `${inStockProducts}/${totalProducts}`,
       icon: CubeIcon,
-      change: '100%',
+      change: `${Math.round((inStockProducts / totalProducts) * 100)}%`,
       changeType: 'positive',
       color: 'from-purple-500 to-purple-600',
     },
     {
       name: 'הזמנות החודש',
-      value: monthlyOrders,
+      value: monthlyOrdersCount,
       icon: ChartBarIcon,
-      change: '+18%',
+      change: monthlyOrdersCount > 0 ? `+${monthlyOrdersCount}` : '0',
       changeType: 'positive',
       color: 'from-pink-500 to-pink-600',
     },

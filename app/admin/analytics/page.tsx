@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAdminSession, clearAdminSession } from '@/lib/auth';
-import { getProductsByCategory } from '@/lib/products';
+import { getProductsByCategory, PRODUCTS } from '@/lib/products';
+import { useOrdersStore } from '@/lib/orders';
 import Link from 'next/link';
 import {
   ArrowRightOnRectangleIcon,
@@ -16,6 +17,7 @@ export default function AdminAnalytics() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { getAllOrders } = useOrdersStore();
 
   useEffect(() => {
     const authenticated = getAdminSession();
@@ -50,23 +52,71 @@ export default function AdminAnalytics() {
   const cookies = getProductsByCategory('cookie');
   const breads = getProductsByCategory('bread');
 
-  // Mock analytics data
-  const topProducts = [
-    { name: 'עוגת שוקולד מפנקת', sales: 45, revenue: 7195.50, trend: 'up' },
-    { name: 'עוגיות שוקולד צ\'יפס', sales: 89, revenue: 3996.10, trend: 'up' },
-    { name: 'חלה ביתית', sales: 67, revenue: 2003.30, trend: 'up' },
-    { name: 'עוגת גבינה אפויה', sales: 32, revenue: 5756.80, trend: 'down' },
-    { name: 'לחם מחמצת', sales: 54, revenue: 1776.60, trend: 'up' },
-  ];
+  // Calculate real analytics from orders
+  const allOrders = getAllOrders();
+  
+  // Calculate revenue by category
+  const categoryRevenue = {
+    cake: 0,
+    cookie: 0,
+    bread: 0,
+  };
 
-  const monthlySales = [
-    { month: 'ינואר', sales: 4200, revenue: 52300 },
-    { month: 'פברואר', sales: 4800, revenue: 59800 },
-    { month: 'מרץ', sales: 5200, revenue: 64500 },
-    { month: 'אפריל', sales: 4900, revenue: 61200 },
-    { month: 'מאי', sales: 5500, revenue: 68900 },
-    { month: 'יוני', sales: 6100, revenue: 76400 },
-  ];
+  allOrders.forEach(order => {
+    if (order.status !== 'cancelled') {
+      order.items.forEach(item => {
+        const product = PRODUCTS.find(p => p.id === item.productId);
+        if (product) {
+          categoryRevenue[product.category] += item.price * item.quantity;
+        }
+      });
+    }
+  });
+
+  // Calculate top products
+  const productSales: Record<string, { name: string; sales: number; revenue: number }> = {};
+  
+  allOrders.forEach(order => {
+    if (order.status !== 'cancelled') {
+      order.items.forEach(item => {
+        if (!productSales[item.productId]) {
+          productSales[item.productId] = {
+            name: item.productName,
+            sales: 0,
+            revenue: 0,
+          };
+        }
+        productSales[item.productId].sales += item.quantity;
+        productSales[item.productId].revenue += item.price * item.quantity;
+      });
+    }
+  });
+
+  const topProducts = Object.values(productSales)
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 5)
+    .map(product => ({
+      ...product,
+      trend: 'up' as const, // Can be enhanced with historical data
+    }));
+
+  // Calculate monthly sales (last 6 months)
+  const monthlySales = Array.from({ length: 6 }, (_, i) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - (5 - i));
+    const monthOrders = allOrders.filter(order => {
+      const orderDate = new Date(order.orderDate);
+      return orderDate.getMonth() === date.getMonth() && 
+             orderDate.getFullYear() === date.getFullYear() &&
+             order.status !== 'cancelled';
+    });
+    
+    return {
+      month: date.toLocaleDateString('he-IL', { month: 'long' }),
+      sales: monthOrders.length,
+      revenue: monthOrders.reduce((sum, order) => sum + order.total, 0),
+    };
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100" dir="rtl">
@@ -112,7 +162,7 @@ export default function AdminAnalytics() {
               <p className="text-3xl font-bold mb-2">{cakes.length}</p>
               <p className="text-sm text-white/90">מוצרים פעילים</p>
               <div className="mt-4 pt-4 border-t border-white/20">
-                <p className="text-sm">מכירות החודש: ₪25,400</p>
+                <p className="text-sm">מכירות החודש: ₪{categoryRevenue.cake.toLocaleString('he-IL', { minimumFractionDigits: 2 })}</p>
               </div>
             </div>
 
@@ -125,7 +175,7 @@ export default function AdminAnalytics() {
               <p className="text-3xl font-bold mb-2">{cookies.length}</p>
               <p className="text-sm text-white/90">מוצרים פעילים</p>
               <div className="mt-4 pt-4 border-t border-white/20">
-                <p className="text-sm">מכירות החודש: ₪18,600</p>
+                <p className="text-sm">מכירות החודש: ₪{categoryRevenue.cookie.toLocaleString('he-IL', { minimumFractionDigits: 2 })}</p>
               </div>
             </div>
 
@@ -138,7 +188,7 @@ export default function AdminAnalytics() {
               <p className="text-3xl font-bold mb-2">{breads.length}</p>
               <p className="text-sm text-white/90">מוצרים פעילים</p>
               <div className="mt-4 pt-4 border-t border-white/20">
-                <p className="text-sm">מכירות החודש: ₪12,800</p>
+                <p className="text-sm">מכירות החודש: ₪{categoryRevenue.bread.toLocaleString('he-IL', { minimumFractionDigits: 2 })}</p>
               </div>
             </div>
           </div>
@@ -147,62 +197,70 @@ export default function AdminAnalytics() {
         {/* Top Products */}
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 mb-8">
           <h3 className="text-xl font-bold text-gray-900 mb-4">המוצרים הנמכרים ביותר</h3>
-          <div className="space-y-4">
-            {topProducts.map((product, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-pink-50 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-full font-bold">
-                    {idx + 1}
+          {topProducts.length > 0 ? (
+            <div className="space-y-4">
+              {topProducts.map((product, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-pink-50 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-full font-bold">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{product.name}</p>
+                      <p className="text-sm text-gray-600">{product.sales} מכירות</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{product.name}</p>
-                    <p className="text-sm text-gray-600">{product.sales} מכירות</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-left">
-                    <p className="font-bold text-gray-900">₪{product.revenue.toLocaleString()}</p>
-                    <div className="flex items-center gap-1">
-                      {product.trend === 'up' ? (
-                        <ArrowTrendingUpIcon className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <ArrowTrendingDownIcon className="h-4 w-4 text-red-600" />
-                      )}
-                      <span className={`text-xs font-medium ${
-                        product.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {product.trend === 'up' ? '+15%' : '-8%'}
-                      </span>
+                  <div className="flex items-center gap-4">
+                    <div className="text-left">
+                      <p className="font-bold text-gray-900">₪{product.revenue.toLocaleString('he-IL', { minimumFractionDigits: 2 })}</p>
+                      <div className="flex items-center gap-1">
+                        {product.trend === 'up' ? (
+                          <ArrowTrendingUpIcon className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <ArrowTrendingDownIcon className="h-4 w-4 text-red-600" />
+                        )}
+                        <span className={`text-xs font-medium ${
+                          product.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {product.trend === 'up' ? 'פופולרי' : ''}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 py-8">אין עדיין נתוני מכירות</p>
+          )}
         </div>
 
         {/* Monthly Sales Chart (Simple visualization) */}
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
           <h3 className="text-xl font-bold text-gray-900 mb-6">מכירות חודשיות</h3>
-          <div className="space-y-4">
-            {monthlySales.map((data) => (
-              <div key={data.month}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">{data.month}</span>
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-600">{data.sales} מכירות</span>
-                    <span className="font-bold text-gray-900">₪{data.revenue.toLocaleString()}</span>
+          {monthlySales.some(m => m.sales > 0) ? (
+            <div className="space-y-4">
+              {monthlySales.map((data) => (
+                <div key={data.month}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">{data.month}</span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-gray-600">{data.sales} מכירות</span>
+                      <span className="font-bold text-gray-900">₪{data.revenue.toLocaleString('he-IL', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-pink-500 to-purple-600 h-3 rounded-full transition-all"
+                      style={{ width: data.revenue > 0 ? `${Math.min((data.revenue / Math.max(...monthlySales.map(m => m.revenue))) * 100, 100)}%` : '0%' }}
+                    ></div>
                   </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-pink-500 to-purple-600 h-3 rounded-full transition-all"
-                    style={{ width: `${(data.revenue / 80000) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 py-8">אין עדיין נתוני מכירות חודשיים</p>
+          )}
         </div>
       </main>
     </div>
