@@ -453,30 +453,31 @@ export default function CartPage() {
                       disabled={isSubmitting}
                     />
                     </div>
+                  </div>
                     
-                    {/* Next Button */}
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setShowCheckout(false)}
-                        disabled={isSubmitting}
-                        className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        ביטול
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        המשך לתשלום →
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {/* Payment Step */}
-                    <CreditCardForm 
+                  {/* Next Button */}
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowCheckout(false)}
+                      disabled={isSubmitting}
+                      className="flex-1 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ביטול
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-4 rounded-xl hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      המשך לתשלום →
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Payment Step */}
+                  <CreditCardForm 
                       onCardDataChange={setCardData}
                       isSubmitting={isSubmitting}
                     />
