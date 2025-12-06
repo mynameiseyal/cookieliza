@@ -134,7 +134,8 @@ export const validateCardNumber = (cardNumber: string): boolean => {
 
 export const validateExpiryDate = (month: string, year: string): boolean => {
   const now = new Date();
-  const expiry = new Date(parseInt(`20${year}`), parseInt(month) - 1);
+  // Set expiry to first day of NEXT month (cards are valid through entire expiration month)
+  const expiry = new Date(parseInt(`20${year}`), parseInt(month)); // month is 0-indexed, so this gives us next month
   return expiry > now;
 };
 
