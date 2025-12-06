@@ -45,8 +45,8 @@ export default function CreditCardForm({ onCardDataChange, isSubmitting = false 
   };
 
   const handleCardholderChange = (value: string) => {
-    // Allow only letters and spaces
-    const cleaned = value.replace(/[^a-zA-Z\s]/g, '');
+    // Allow letters (English and Hebrew), spaces, and common punctuation
+    const cleaned = value.replace(/[^a-zA-Z\u0590-\u05FF\s'-]/g, '');
     setCardData(prev => ({ ...prev, cardholderName: cleaned }));
     
     const isValid = cleaned.trim().length >= 3;
@@ -150,9 +150,9 @@ export default function CreditCardForm({ onCardDataChange, isSubmitting = false 
           id="cardholderName"
           value={cardData.cardholderName}
           onChange={(e) => handleCardholderChange(e.target.value)}
-          placeholder="JOHN DOE"
+          placeholder="שם מלא / FULL NAME"
           disabled={isSubmitting}
-          className={`w-full px-4 py-3 text-gray-900 bg-white border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all placeholder:text-gray-600 uppercase ${
+          className={`w-full px-4 py-3 text-gray-900 bg-white border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all placeholder:text-gray-600 ${
             errors.cardholderName ? 'border-red-500 focus:border-red-600' : 'border-gray-400 focus:border-pink-600'
           }`}
         />
