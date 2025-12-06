@@ -579,15 +579,17 @@ export default function CartPage() {
                       </button>
                     </div>
 
-                    {/* Skip Payment for Testing */}
-                    <button
-                      type="button"
-                      onClick={handleSkipPayment}
-                      disabled={isSubmitting}
-                      className="w-full text-sm text-gray-600 hover:text-gray-900 underline disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      🧪 דלג על תשלום (מצב בדיקה)
-                    </button>
+                    {/* Skip Payment for Testing - Only in development */}
+                    {process.env.NODE_ENV !== 'production' && (
+                      <button
+                        type="button"
+                        onClick={handleSkipPayment}
+                        disabled={isSubmitting}
+                        className="w-full text-sm text-gray-600 hover:text-gray-900 underline disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        🧪 דלג על תשלום (מצב בדיקה)
+                      </button>
+                    )}
 
                     <p className="text-xs text-gray-500 text-center">
                       התשלום מאובטח ומוצפן. לא נשמור את פרטי הכרטיס שלך.

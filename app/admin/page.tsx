@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { checkAdminAuth, setAdminSession } from '@/lib/auth';
 import toast from 'react-hot-toast';
 
 export default function AdminLogin() {
@@ -10,22 +9,33 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate async check
-    setTimeout(() => {
-      if (checkAdminAuth(password)) {
-        setAdminSession(true);
+    try {
+      // Call server-side API (secure!)
+      const response = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
         toast.success('התחברת בהצלחה! 🎉');
         router.push('/admin/dashboard');
       } else {
-        toast.error('סיסמה שגויה. נסה שוב.');
+        toast.error(data.error || 'סיסמה שגויה. נסה שוב.');
         setPassword('');
       }
+    } catch (error) {
+      toast.error('שגיאה בהתחברות. נסה שוב.');
+      console.error('Login error:', error);
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
   return (
