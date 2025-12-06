@@ -30,7 +30,7 @@ export default function ProductForm({ product, onSave, onClose }: ProductFormPro
     onSave(formData);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<parameter name="HTMLInputElement">) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setFormData({ ...formData, image: value });
     setImagePreview(value);
