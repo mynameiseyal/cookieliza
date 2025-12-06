@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PRODUCTS, getProductsByCategory } from '@/lib/products';
+import { useProductsStore } from '@/lib/products-store';
 import { useOrdersStore } from '@/lib/orders';
 import Link from 'next/link';
 import {
@@ -19,6 +19,7 @@ import toast from 'react-hot-toast';
 export default function AdminDashboard() {
   const router = useRouter();
   const { getTodayOrders, getMonthlyOrders, getTotalRevenue, getAllOrders, getOrdersByStatus } = useOrdersStore();
+  const { getProductsByCategory, getAllProducts } = useProductsStore();
 
   const handleLogout = async () => {
     try {
@@ -42,8 +43,9 @@ export default function AdminDashboard() {
   const allOrders = getAllOrders();
   const todayOrders = getTodayOrders();
   const monthlyOrders = getMonthlyOrders();
-  const totalProducts = PRODUCTS.length;
-  const inStockProducts = PRODUCTS.filter(p => p.inStock).length;
+  const allProducts = getAllProducts();
+  const totalProducts = allProducts.length;
+  const inStockProducts = allProducts.filter(p => p.inStock).length;
   const totalRevenue = getTotalRevenue();
   const todayOrdersCount = todayOrders.length;
   const monthlyOrdersCount = monthlyOrders.length;

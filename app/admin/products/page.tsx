@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PRODUCTS, Product } from '@/lib/products';
+import { useProductsStore } from '@/lib/products-store';
+import { Product } from '@/lib/products';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -12,17 +13,24 @@ import {
   ArrowRightOnRectangleIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import ProductForm from '@/components/ProductForm';
 
 export default function AdminProducts() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<'all' | 'cake' | 'cookie' | 'bread'>('all');
+  const [showForm, setShowForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | undefined>();
+  const [deletingProduct, setDeletingProduct] = useState<Product | undefined>();
   const router = useRouter();
+
+  const { getAllProducts, addProduct, updateProduct, deleteProduct } = useProductsStore();
+  const allProducts = getAllProducts();
 
   const handleLogout = async () => {
     try {
-      // Call logout API to clear HTTP-only cookie
       await fetch('/api/admin/auth', {
         method: 'DELETE',
       });
@@ -35,19 +43,45 @@ export default function AdminProducts() {
   };
 
   // Filter products
-  const filteredProducts = PRODUCTS.filter(product => {
+  const filteredProducts = allProducts.filter(product => {
     const matchesSearch = product.name.includes(searchQuery) || 
                          product.description.includes(searchQuery);
     const matchesCategory = filterCategory === 'all' || product.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const handleEdit = (product: Product) => {
-    toast.success(`עריכת ${product.name} (בפיתוח)`);
+  const handleAdd = () => {
+    setEditingProduct(undefined);
+    setShowForm(true);
   };
 
-  const handleDelete = (product: Product) => {
-    toast.error(`מחיקת ${product.name} (בפיתוח)`);
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setShowForm(true);
+  };
+
+  const handleSave = (productData: Omit<Product, 'id'>) => {
+    if (editingProduct) {
+      updateProduct(editingProduct.id, productData);
+      toast.success(`${productData.name} עודכן בהצלחה! ✨`);
+    } else {
+      addProduct(productData);
+      toast.success(`${productData.name} נוסף בהצלחה! 🎉`);
+    }
+    setShowForm(false);
+    setEditingProduct(undefined);
+  };
+
+  const handleDeleteClick = (product: Product) => {
+    setDeletingProduct(product);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deletingProduct) {
+      deleteProduct(deletingProduct.id);
+      toast.success(`${deletingProduct.name} נמחק בהצלחה`);
+      setDeletingProduct(undefined);
+    }
   };
 
   return (
@@ -83,7 +117,7 @@ export default function AdminProducts() {
               <p className="text-gray-600">נהל את הקטלוג של המאפייה</p>
             </div>
             <button
-              onClick={() => toast.success('הוספת מוצר חדש (בפיתוח)')}
+              onClick={handleAdd}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all transform hover:scale-105 shadow-lg font-medium"
             >
               <PlusIcon className="h-5 w-5" />
@@ -184,7 +218,7 @@ export default function AdminProducts() {
                           <PencilIcon className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => handleDelete(product)}
+                          onClick={() => handleDeleteClick(product)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="מחק"
                         >
@@ -206,6 +240,58 @@ export default function AdminProducts() {
           </div>
         )}
       </main>
+
+      {/* Product Form Modal */}
+      {showForm && (
+        <ProductForm
+          product={editingProduct}
+          onSave={handleSave}
+          onClose={() => {
+            setShowForm(false);
+            setEditingProduct(undefined);
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingProduct && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setDeletingProduct(undefined)}>
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" 
+            onClick={(e) => e.stopPropagation()}
+            dir="rtl"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">מחיקת מוצר</h3>
+                <p className="text-sm text-gray-600">פעולה זו לא ניתנת לביטול</p>
+              </div>
+            </div>
+            
+            <p className="text-gray-700 mb-6">
+              האם אתה בטוח שברצונך למחוק את <span className="font-bold">{deletingProduct.name}</span>?
+            </p>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleDeleteConfirm}
+                className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition-all font-semibold"
+              >
+                מחק
+              </button>
+              <button
+                onClick={() => setDeletingProduct(undefined)}
+                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all font-semibold"
+              >
+                ביטול
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

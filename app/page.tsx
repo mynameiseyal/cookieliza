@@ -4,11 +4,12 @@ import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useCartStore } from './store/cart';
 import Link from 'next/link';
-import { getProductsByCategory } from '@/lib/products';
+import { useProductsStore } from '@/lib/products-store';
 import toast from 'react-hot-toast';
 
 export default function Home() {
   const { addItem, getTotalItems } = useCartStore();
+  const { getProductsByCategory } = useProductsStore();
   
   const cakes = getProductsByCategory('cake');
   const cookies = getProductsByCategory('cookie');
