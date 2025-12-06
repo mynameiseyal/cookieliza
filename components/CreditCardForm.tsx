@@ -58,10 +58,24 @@ export default function CreditCardForm({ onCardDataChange, isSubmitting = false 
     const cleaned = value.replace(/\D/g, '');
     
     if (field === 'month' && cleaned.length <= 2) {
-      const month = cleaned ? Math.min(parseInt(cleaned), 12).toString().padStart(2, '0') : '';
-      setCardData(prev => ({ ...prev, expiryMonth: month }));
+      let month = cleaned;
       
-      if (month && cardData.expiryYear) {
+      // Auto-format: if user types 2-9 as first digit, prepend 0
+      if (cleaned.length === 1 && parseInt(cleaned) > 1) {
+        month = '0' + cleaned;
+        setCardData(prev => ({ ...prev, expiryMonth: month }));
+        // Auto-focus year field
+        document.getElementById('expiryYear')?.focus();
+      } else if (cleaned.length === 2) {
+        month = Math.min(parseInt(cleaned), 12).toString().padStart(2, '0');
+        setCardData(prev => ({ ...prev, expiryMonth: month }));
+        // Auto-focus year field when month is complete
+        document.getElementById('expiryYear')?.focus();
+      } else {
+        setCardData(prev => ({ ...prev, expiryMonth: cleaned }));
+      }
+      
+      if (month && month.length === 2 && cardData.expiryYear) {
         const isValid = validateExpiryDate(month, cardData.expiryYear);
         setErrors(prev => ({ ...prev, expiry: isValid ? '' : 'תוקף כרטיס פג' }));
         updateParent({ ...cardData, expiryMonth: month }, isValid && validateCardNumber(cardData.cardNumber) && !errors.cardholderName && !errors.cvv);
@@ -162,35 +176,40 @@ export default function CreditCardForm({ onCardDataChange, isSubmitting = false 
       {/* Expiry and CVV */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="expiry" className="block text-sm font-semibold text-gray-900 mb-2">
+          <label htmlFor="expiryMonth" className="block text-sm font-semibold text-gray-900 mb-2">
             תוקף <span className="text-red-600">*</span>
           </label>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <input
               type="text"
+              id="expiryMonth"
               placeholder="MM"
               value={cardData.expiryMonth}
               onChange={(e) => handleExpiryChange('month', e.target.value)}
               disabled={isSubmitting}
               maxLength={2}
-              className={`w-full px-3 py-3 text-gray-900 bg-white border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all text-center placeholder:text-gray-600 ${
+              inputMode="numeric"
+              className={`w-full px-4 py-3 text-gray-900 bg-white border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all text-center placeholder:text-gray-600 text-lg ${
                 errors.expiry ? 'border-red-500 focus:border-red-600' : 'border-gray-400 focus:border-pink-600'
               }`}
             />
-            <span className="text-gray-500 text-xl self-center">/</span>
+            <span className="text-gray-500 text-xl font-bold">/</span>
             <input
               type="text"
+              id="expiryYear"
               placeholder="YY"
               value={cardData.expiryYear}
               onChange={(e) => handleExpiryChange('year', e.target.value)}
               disabled={isSubmitting}
               maxLength={2}
-              className={`w-full px-3 py-3 text-gray-900 bg-white border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all text-center placeholder:text-gray-600 ${
+              inputMode="numeric"
+              className={`w-full px-4 py-3 text-gray-900 bg-white border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all text-center placeholder:text-gray-600 text-lg ${
                 errors.expiry ? 'border-red-500 focus:border-red-600' : 'border-gray-400 focus:border-pink-600'
               }`}
             />
           </div>
           {errors.expiry && <p className="text-sm text-red-600 mt-1">{errors.expiry}</p>}
+          <p className="text-xs text-gray-600 mt-1">לדוגמה: 12/25</p>
         </div>
 
         <div>
@@ -205,11 +224,13 @@ export default function CreditCardForm({ onCardDataChange, isSubmitting = false 
             placeholder="123"
             disabled={isSubmitting}
             maxLength={4}
-            className={`w-full px-4 py-3 text-gray-900 bg-white border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all text-center placeholder:text-gray-600 ${
+            inputMode="numeric"
+            className={`w-full px-4 py-3 text-gray-900 bg-white border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all text-center placeholder:text-gray-600 text-lg ${
               errors.cvv ? 'border-red-500 focus:border-red-600' : 'border-gray-400 focus:border-pink-600'
             }`}
           />
           {errors.cvv && <p className="text-sm text-red-600 mt-1">{errors.cvv}</p>}
+          <p className="text-xs text-gray-600 mt-1">3-4 ספרות</p>
         </div>
       </div>
 
