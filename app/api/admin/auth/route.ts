@@ -1,28 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import {
+  generateSessionToken,
+  createSession,
+  deleteSession,
+  isSessionValid,
+} from '@/lib/admin-session';
 
 // Server-side password check (NOT exposed to client)
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'cookie2010';
-
-// Generate a simple session token (in production, use JWT or proper session management)
-function generateSessionToken(): string {
-  return `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-}
-
-// Store active sessions in memory (in production, use Redis or database)
-const activeSessions = new Map<string, { createdAt: number }>();
-
-// Clean up expired sessions (older than 24 hours)
-function cleanExpiredSessions() {
-  const now = Date.now();
-  const expiryTime = 24 * 60 * 60 * 1000; // 24 hours
-  
-  for (const [token, session] of activeSessions.entries()) {
-    if (now - session.createdAt > expiryTime) {
-      activeSessions.delete(token);
-    }
-  }
-}
 
 // POST /api/admin/auth - Login
 export async function POST(request: NextRequest) {
@@ -40,10 +26,7 @@ export async function POST(request: NextRequest) {
     if (password === ADMIN_PASSWORD) {
       // Generate session token
       const sessionToken = generateSessionToken();
-      activeSessions.set(sessionToken, { createdAt: Date.now() });
-
-      // Clean up old sessions
-      cleanExpiredSessions();
+      createSession(sessionToken);
 
       // Create response with secure HTTP-only cookie
       const response = NextResponse.json({
@@ -84,7 +67,7 @@ export async function GET(request: NextRequest) {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('admin-session')?.value;
 
-  if (!sessionToken || !activeSessions.has(sessionToken)) {
+  if (!isSessionValid(sessionToken)) {
     return NextResponse.json(
       { authenticated: false },
       { status: 401 }
@@ -100,7 +83,7 @@ export async function DELETE(request: NextRequest) {
   const sessionToken = cookieStore.get('admin-session')?.value;
 
   if (sessionToken) {
-    activeSessions.delete(sessionToken);
+    deleteSession(sessionToken);
   }
 
   const response = NextResponse.json({ success: true });
