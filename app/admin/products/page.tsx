@@ -141,7 +141,7 @@ export default function AdminProducts() {
               <FunnelIcon className="h-5 w-5 text-gray-400" />
               <select
                 value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value as any)}
+                onChange={(e) => setFilterCategory(e.target.value as 'all' | 'cake' | 'cookie' | 'bread')}
                 className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all"
               >
                 <option value="all">כל הקטגוריות</option>

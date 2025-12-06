@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Product } from '@/lib/products';
 import Image from 'next/image';
@@ -100,7 +100,7 @@ export default function ProductForm({ product, onSave, onClose }: ProductFormPro
                 id="category"
                 required
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as 'cake' | 'cookie' | 'bread' })}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-600 transition-all"
               >
                 <option value="cake">🎂 עוגה</option>

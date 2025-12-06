@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProductsStore } from '@/lib/products-store';
 import { useOrdersStore } from '@/lib/orders';
@@ -12,13 +11,12 @@ import {
   CubeIcon,
   ArrowRightOnRectangleIcon,
   UsersIcon,
-  ClockIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const { getTodayOrders, getMonthlyOrders, getTotalRevenue, getAllOrders, getOrdersByStatus } = useOrdersStore();
+  const { getTodayOrders, getMonthlyOrders, getTotalRevenue, getAllOrders } = useOrdersStore();
   const { getProductsByCategory, getAllProducts } = useProductsStore();
 
   const handleLogout = async () => {

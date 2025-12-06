@@ -127,7 +127,7 @@ export default function Home() {
                     האמת? הכל התחיל כתחביב קטן.
                   </p>
                   <p className="text-sm sm:text-base text-gray-600">
-                    משהו בין "נראה לי שאנסה מתכון חדש" לבין "טוב, אולי לא הייתי אמורה לאפות שלוש עוגות בשתיים בלילה".
+                    משהו בין &quot;נראה לי שאנסה מתכון חדש&quot; לבין &quot;טוב, אולי לא הייתי אמורה לאפות שלוש עוגות בשתיים בלילה&quot;.
                   </p>
                 </div>
 
@@ -158,7 +158,7 @@ export default function Home() {
                       <div className="w-1.5 h-1.5 rounded-full bg-gray-900 mt-2.5 flex-shrink-0"></div>
                       <div>
                         <p className="font-semibold text-gray-900 mb-1">שיתאים בדיוק למזמין</p>
-                        <p className="text-sm sm:text-base text-gray-600">מעוגה מפוארת ועד "פשוט מתחשק לי משהו מתוק"</p>
+                        <p className="text-sm sm:text-base text-gray-600">מעוגה מפוארת ועד &quot;פשוט מתחשק לי משהו מתוק&quot;</p>
                       </div>
                     </div>
                   </div>

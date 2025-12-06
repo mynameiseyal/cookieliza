@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getProductsByCategory, PRODUCTS } from '@/lib/products';
 import { useOrdersStore } from '@/lib/orders';

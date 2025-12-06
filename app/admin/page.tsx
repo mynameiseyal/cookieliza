@@ -23,7 +23,7 @@ export default function AdminLogin() {
             return;
           }
         }
-      } catch (error) {
+      } catch {
         // Not logged in, show login form
         console.log('Not authenticated');
       } finally {

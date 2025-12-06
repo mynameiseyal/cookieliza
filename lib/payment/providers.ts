@@ -112,7 +112,7 @@ export class TestPaymentProvider implements IPaymentProvider {
 export class StripePaymentProvider implements IPaymentProvider {
   name: PaymentProvider = 'visa';
 
-  async processPayment(request: PaymentRequest): Promise<PaymentResponse> {
+  async processPayment(): Promise<PaymentResponse> {
     // TODO: Implement Stripe integration
     // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     // const paymentIntent = await stripe.paymentIntents.create({...});
@@ -129,7 +129,7 @@ export class StripePaymentProvider implements IPaymentProvider {
 export class IsracardPaymentProvider implements IPaymentProvider {
   name: PaymentProvider = 'isracard';
 
-  async processPayment(request: PaymentRequest): Promise<PaymentResponse> {
+  async processPayment(): Promise<PaymentResponse> {
     // TODO: Implement Isracard integration
     // Documentation: https://www.isracard.co.il/business/online-payment
     
@@ -145,7 +145,7 @@ export class IsracardPaymentProvider implements IPaymentProvider {
 export class PayPalPaymentProvider implements IPaymentProvider {
   name: PaymentProvider = 'paypal';
 
-  async processPayment(request: PaymentRequest): Promise<PaymentResponse> {
+  async processPayment(): Promise<PaymentResponse> {
     // TODO: Implement PayPal integration
     // const paypal = require('@paypal/checkout-server-sdk');
     // Documentation: https://developer.paypal.com/docs/checkout/

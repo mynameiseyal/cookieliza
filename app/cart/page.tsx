@@ -4,7 +4,7 @@
 import { useCartStore } from '../store/cart';
 import { useOrdersStore } from '@/lib/orders';
 import { createPaymentProvider } from '@/lib/payment/providers';
-import type { CreditCardData, PaymentMethod } from '@/lib/payment/types';
+import type { CreditCardData } from '@/lib/payment/types';
 import Image from 'next/image';
 import { MinusIcon, PlusIcon, TrashIcon, ArrowRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';

@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 }
 
 // GET /api/admin/auth - Check session
-export async function GET(request: NextRequest) {
+export async function GET() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('admin-session')?.value;
 
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
 }
 
 // DELETE /api/admin/auth - Logout
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('admin-session')?.value;
 
