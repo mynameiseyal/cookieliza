@@ -30,28 +30,38 @@ export default function CreditCardForm({ onCardDataChange, isSubmitting = false 
     const cleaned = value.replace(/\D/g, '');
     if (cleaned.length <= 16) {
       const formatted = formatCardNumber(cleaned);
-      setCardData(prev => ({ ...prev, cardNumber: cleaned }));
-      
-      // Validate on blur or when complete
-      if (cleaned.length >= 13) {
-        const isValid = validateCardNumber(cleaned);
-        setErrors(prev => ({ ...prev, cardNumber: isValid ? '' : 'מספר כרטיס לא תקין' }));
-        updateParent({ ...cardData, cardNumber: cleaned }, isValid && !errors.cardholderName && !errors.expiry && !errors.cvv);
-      } else {
-        setErrors(prev => ({ ...prev, cardNumber: '' }));
-        updateParent(null, false);
-      }
+      setCardData(prev => {
+        const newData = { ...prev, cardNumber: cleaned };
+        
+        // Validate on blur or when complete
+        if (cleaned.length >= 13) {
+          const isValid = validateCardNumber(cleaned);
+          setErrors(prev => ({ ...prev, cardNumber: isValid ? '' : 'מספר כרטיס לא תקין' }));
+          // Use newData which has the updated values
+          updateParent(newData, isValid && !errors.cardholderName && !errors.expiry && !errors.cvv);
+        } else {
+          setErrors(prev => ({ ...prev, cardNumber: '' }));
+          updateParent(null, false);
+        }
+        
+        return newData;
+      });
     }
   };
 
   const handleCardholderChange = (value: string) => {
     // Allow letters (English and Hebrew), spaces, and common punctuation
     const cleaned = value.replace(/[^a-zA-Z\u0590-\u05FF\s'-]/g, '');
-    setCardData(prev => ({ ...prev, cardholderName: cleaned }));
-    
-    const isValid = cleaned.trim().length >= 3;
-    setErrors(prev => ({ ...prev, cardholderName: isValid ? '' : 'שם בעל הכרטיס חייב להכיל לפחות 3 תווים' }));
-    updateParent({ ...cardData, cardholderName: cleaned }, isValid && validateCardNumber(cardData.cardNumber) && !errors.expiry && !errors.cvv);
+    setCardData(prev => {
+      const newData = { ...prev, cardholderName: cleaned };
+      
+      const isValid = cleaned.trim().length >= 3;
+      setErrors(prev => ({ ...prev, cardholderName: isValid ? '' : 'שם בעל הכרטיס חייב להכיל לפחות 3 תווים' }));
+      // Use newData which has the updated values
+      updateParent(newData, isValid && validateCardNumber(newData.cardNumber) && !errors.expiry && !errors.cvv);
+      
+      return newData;
+    });
   };
 
   const handleExpiryChange = (field: 'month' | 'year', value: string) => {
@@ -63,47 +73,62 @@ export default function CreditCardForm({ onCardDataChange, isSubmitting = false 
       // Auto-format: if user types 2-9 as first digit, prepend 0
       if (cleaned.length === 1 && parseInt(cleaned) > 1) {
         month = '0' + cleaned;
-        setCardData(prev => ({ ...prev, expiryMonth: month }));
-        // Auto-focus year field
-        document.getElementById('expiryYear')?.focus();
       } else if (cleaned.length === 2) {
         month = Math.min(parseInt(cleaned), 12).toString().padStart(2, '0');
-        setCardData(prev => ({ ...prev, expiryMonth: month }));
+      }
+      
+      setCardData(prev => {
+        const newData = { ...prev, expiryMonth: month };
+        
         // Auto-focus year field when month is complete
-        document.getElementById('expiryYear')?.focus();
-      } else {
-        setCardData(prev => ({ ...prev, expiryMonth: cleaned }));
-      }
-      
-      if (month && month.length === 2 && cardData.expiryYear) {
-        const isValid = validateExpiryDate(month, cardData.expiryYear);
-        setErrors(prev => ({ ...prev, expiry: isValid ? '' : 'תוקף כרטיס פג' }));
-        updateParent({ ...cardData, expiryMonth: month }, isValid && validateCardNumber(cardData.cardNumber) && !errors.cardholderName && !errors.cvv);
-      }
+        if (month.length === 2) {
+          document.getElementById('expiryYear')?.focus();
+        }
+        
+        // Validate if both month and year are present
+        if (month && month.length === 2 && newData.expiryYear) {
+          const isValid = validateExpiryDate(month, newData.expiryYear);
+          setErrors(prev => ({ ...prev, expiry: isValid ? '' : 'תוקף כרטיס פג' }));
+          updateParent(newData, isValid && validateCardNumber(newData.cardNumber) && !errors.cardholderName && !errors.cvv);
+        } else {
+          setErrors(prev => ({ ...prev, expiry: '' }));
+        }
+        
+        return newData;
+      });
     } else if (field === 'year' && cleaned.length <= 2) {
-      setCardData(prev => ({ ...prev, expiryYear: cleaned }));
-      
-      if (cleaned.length === 2 && cardData.expiryMonth) {
-        const isValid = validateExpiryDate(cardData.expiryMonth, cleaned);
-        setErrors(prev => ({ ...prev, expiry: isValid ? '' : 'תוקף כרטיס פג' }));
-        updateParent({ ...cardData, expiryYear: cleaned }, isValid && validateCardNumber(cardData.cardNumber) && !errors.cardholderName && !errors.cvv);
-      }
+      setCardData(prev => {
+        const newData = { ...prev, expiryYear: cleaned };
+        
+        // Validate if both month and year are present
+        if (cleaned.length === 2 && newData.expiryMonth) {
+          const isValid = validateExpiryDate(newData.expiryMonth, cleaned);
+          setErrors(prev => ({ ...prev, expiry: isValid ? '' : 'תוקף כרטיס פג' }));
+          updateParent(newData, isValid && validateCardNumber(newData.cardNumber) && !errors.cardholderName && !errors.cvv);
+        }
+        
+        return newData;
+      });
     }
   };
 
   const handleCVVChange = (value: string) => {
     const cleaned = value.replace(/\D/g, '');
     if (cleaned.length <= 4) {
-      setCardData(prev => ({ ...prev, cvv: cleaned }));
-      
-      if (cleaned.length >= 3) {
-        const isValid = validateCVV(cleaned);
-        setErrors(prev => ({ ...prev, cvv: isValid ? '' : 'CVV לא תקין' }));
-        updateParent({ ...cardData, cvv: cleaned }, isValid && validateCardNumber(cardData.cardNumber) && !errors.cardholderName && !errors.expiry);
-      } else {
-        setErrors(prev => ({ ...prev, cvv: '' }));
-        updateParent(null, false);
-      }
+      setCardData(prev => {
+        const newData = { ...prev, cvv: cleaned };
+        
+        if (cleaned.length >= 3) {
+          const isValid = validateCVV(cleaned);
+          setErrors(prev => ({ ...prev, cvv: isValid ? '' : 'CVV לא תקין' }));
+          updateParent(newData, isValid && validateCardNumber(newData.cardNumber) && !errors.cardholderName && !errors.expiry);
+        } else {
+          setErrors(prev => ({ ...prev, cvv: '' }));
+          updateParent(null, false);
+        }
+        
+        return newData;
+      });
     }
   };
 
