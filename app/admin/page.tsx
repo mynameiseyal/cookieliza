@@ -1,13 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const router = useRouter();
+
+  // Check if already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/admin/auth');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated) {
+            // Already logged in, redirect to dashboard
+            router.push('/admin/dashboard');
+            return;
+          }
+        }
+      } catch (error) {
+        // Not logged in, show login form
+        console.log('Not authenticated');
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkAuth();
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +50,8 @@ export default function AdminLogin() {
 
       if (data.success) {
         toast.success('התחברת בהצלחה! 🎉');
-        router.push('/admin/dashboard');
+        // Use window.location for hard navigation to ensure middleware runs
+        window.location.href = '/admin/dashboard';
       } else {
         toast.error(data.error || 'סיסמה שגויה. נסה שוב.');
         setPassword('');
@@ -37,6 +63,15 @@ export default function AdminLogin() {
       setIsLoading(false);
     }
   };
+
+  // Show loading while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center px-4" dir="rtl">
