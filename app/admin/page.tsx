@@ -75,16 +75,6 @@ export default function AdminLogin() {
               {isLoading ? 'מתחבר...' : 'התחבר'}
             </button>
           </form>
-
-          {/* Help Text */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
-              סיסמת ברירת מחדל: <code className="bg-gray-100 px-2 py-1 rounded">cookie2010</code>
-            </p>
-            <p className="text-xs text-gray-400 mt-2">
-              בפרודקשן, השתמש במערכת אימות מאובטחת
-            </p>
-          </div>
         </div>
       </div>
     </div>
