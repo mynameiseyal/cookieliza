@@ -107,88 +107,112 @@ export default function Home() {
 
         {/* About Section */}
         <section id="about" className="mb-12 sm:mb-16 scroll-mt-24" aria-labelledby="about-heading">
-          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-pink-100">
-            <div className="bg-gradient-to-r from-pink-500 via-pink-400 to-purple-500 p-6 sm:p-8">
-              <h2 id="about-heading" className="text-3xl sm:text-4xl font-bold text-white text-center drop-shadow-lg">
-                נעים מאוד, אני ליזה ווסק 🍰
-              </h2>
-            </div>
-            
-            <div className="p-6 sm:p-8 lg:p-12 space-y-6 text-gray-800 leading-relaxed">
-              <p className="text-base sm:text-lg">
-                ביולוגית ביום, אמא לארבעה בנים שובבים 24/7, ואופה עם אהבה לבצקים, שוקולד ולקציפה שמגיעה בדיוק למרקם הנכון – כבר יותר מ־20 שנה.
-              </p>
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+              {/* Text Content */}
+              <div className="p-8 sm:p-10 lg:p-12 space-y-6">
+                <div className="space-y-3">
+                  <h2 id="about-heading" className="text-3xl sm:text-4xl font-bold text-gray-900">
+                    ליזה ווסק
+                  </h2>
+                  <p className="text-lg text-gray-600 font-medium">
+                    ביולוגית ומאפה מקצועית | ניסיון של למעלה מ־20 שנה
+                  </p>
+                </div>
 
-              <div className="border-r-4 border-pink-400 pr-4 sm:pr-6 bg-pink-50 p-4 rounded-r-lg">
-                <p className="text-base sm:text-lg font-semibold text-pink-900">
-                  האמת? הכל התחיל כתחביב קטן.
-                </p>
-                <p className="text-sm sm:text-base text-gray-700 mt-2">
-                  משהו בין "נראה לי שאנסה מתכון חדש" לבין "טוב, אולי לא הייתי אמורה לאפות שלוש עוגות בשתיים בלילה".
-                </p>
-              </div>
+                <div className="h-px bg-gradient-to-r from-pink-200 via-purple-200 to-transparent" aria-hidden="true"></div>
 
-              <p className="text-base sm:text-lg">
-                אבל אז החברים ביקשו, אחריהם החברים של החברים, ובשלב מסוים גם אנשים שאני אפילו לא מכירה - ואז הבנתי שמשהו טוב קורה כאן.
-              </p>
+                <div className="space-y-5 text-gray-700 leading-relaxed">
+                  <p className="text-base sm:text-lg">
+                    ביולוגית ביום, אמא לארבעה בנים שובבים 24/7, ואופה עם אהבה לבצקים, שוקולד ולקציפה שמגיעה בדיוק למרקם הנכון – כבר יותר מ־20 שנה.
+                  </p>
 
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 sm:p-8">
-                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-6">
-                  מה חשוב לי?
-                </h3>
-                <ul className="space-y-4">
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl flex-shrink-0">✨</span>
-                    <div>
-                      <p className="font-bold text-gray-900">שיהיה טעים באמת</p>
-                      <p className="text-sm sm:text-base text-gray-700">בלי קיצורי דרך ובלי פשרות</p>
+                  <p className="text-base sm:text-lg">
+                    מה שהתחיל כתחביב אישי הפך לעסק משגשג, תודות לביקוש הגובר מחברים, משפחה ולקוחות מרוצים. כיום, אני מתמחה באפייה ביתית איכותית, תוך שימוש בחומרי גלם מובחרים ותשומת לב לכל פרט.
+                  </p>
+
+                  <p className="text-base sm:text-lg">
+                    המטרה שלי היא פשוטה: להפוך כל אירוע למיוחד באמת, עם מאפים שמשלבים איכות, טעם ועיצוב מושלם.
+                  </p>
+                </div>
+
+                <div className="pt-4">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-5">
+                    הערכים המקצועיים שלי
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-2 h-2 rounded-full bg-pink-600 mt-2 flex-shrink-0"></div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">איכות ללא פשרות</h4>
+                        <p className="text-gray-600">שימוש בחומרי גלם איכוtiים בלבד ומתכונים מוכחים</p>
+                      </div>
                     </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl flex-shrink-0">🎨</span>
-                    <div>
-                      <p className="font-bold text-gray-900">שיהיה יפה</p>
-                      <p className="text-sm sm:text-base text-gray-700">כי קינוח טוב מתחיל בעיניים</p>
+                    <div className="flex items-start gap-4">
+                      <div className="w-2 h-2 rounded-full bg-pink-600 mt-2 flex-shrink-0"></div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">עיצוב מושלם</h4>
+                        <p className="text-gray-600">תשומת לב לפרטים ועיצוב מקצועי לכל מוצר</p>
+                      </div>
                     </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-2xl flex-shrink-0">🎁</span>
-                    <div>
-                      <p className="font-bold text-gray-900">שיתאים בדיוק למזמין</p>
-                      <p className="text-sm sm:text-base text-gray-700">מעוגה מפוארת ועד "פשוט מתחשק לי משהו מתוק"</p>
+                    <div className="flex items-start gap-4">
+                      <div className="w-2 h-2 rounded-full bg-pink-600 mt-2 flex-shrink-0"></div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">התאמה אישית</h4>
+                        <p className="text-gray-600">כל הזמנה מותאמת לטעם ולדרישות הלקוח</p>
+                      </div>
                     </div>
-                  </li>
-                </ul>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                  איך הגעתי לכאן?
-                </h3>
-                <p className="text-base sm:text-lg">
-                  הרבה ניסוי וטעייה, מאות מתכונים, כמות לא הגיונית של קמח על הרצפה, ובקשות בלתי-נגמרות להפוך את כל זה למשהו רשמי.
-                  אז הנה אני – עם אתר, עם אהבה גדולה, ועם מטרה אחת: להפוך כל אירוע (או יום שלישי רגיל) למתוק ושמח יותר.
-                </p>
-              </div>
+              {/* Image/Quote Side */}
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 sm:p-10 lg:p-12 flex flex-col justify-center">
+                <div className="space-y-8">
+                  <blockquote className="border-r-4 border-pink-600 pr-6">
+                    <p className="text-xl sm:text-2xl font-serif italic text-gray-800 leading-relaxed mb-4">
+                      "אפייה היא לא רק מתכון. היא רגש, יצירתיות, ונגיעה של קסם שעוברת מביס לביס."
+                    </p>
+                    <footer className="text-gray-600 font-medium">
+                      — ליזה ווסק
+                    </footer>
+                  </blockquote>
 
-              <div className="border-t-2 border-b-2 border-pink-200 py-6 my-6">
-                <h3 className="text-xl sm:text-2xl font-bold text-pink-600 mb-3 text-center">
-                  ואם תשאלו אותי
-                </h3>
-                <p className="text-base sm:text-lg text-center italic text-gray-700">
-                  אפייה היא לא רק מתכון.<br />
-                  היא רגש, היא יצירתיות, והיא נגיעה קטנה של קסם שעוברת מביס לביס.
-                </p>
-              </div>
+                  <div className="space-y-4 pt-6">
+                    <h3 className="text-lg font-bold text-gray-900">ההתמחות שלי</h3>
+                    <ul className="space-y-3 text-gray-700">
+                      <li className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-pink-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>עוגות מעוצבות לאירועים</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-pink-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>עוגיות גורמה ומיוחדות</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-pink-600 flex-shrink-0" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>לחמים ומאפי בוקר ביתיים</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-pink-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>התאמה אישית לדיאטות מיוחדות</span>
+                      </li>
+                    </ul>
+                  </div>
 
-              <div className="text-center">
-                <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                  המסע המתוק־מלוח שלכם מתחיל כאן. ❤️
-                </p>
-                <div className="mt-6">
-                  <a href="#cakes" className="inline-block bg-gradient-to-r from-pink-600 to-purple-600 text-white px-8 py-4 rounded-full font-bold hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all transform hover:scale-105 shadow-lg">
-                    התחילו להזמין עכשיו 🛒
-                  </a>
+                  <div className="pt-6">
+                    <a href="#cakes" className="inline-flex items-center justify-center bg-pink-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-pink-700 focus:outline-none focus:ring-4 focus:ring-pink-300 transition-colors shadow-md w-full sm:w-auto">
+                      צפו במוצרים שלנו
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
