@@ -55,6 +55,68 @@ export default function CartPage() {
     setCheckoutStep('details');
   };
 
+  const handleSkipPayment = async () => {
+    // For testing only - skip payment validation
+    setIsSubmitting(true);
+
+    try {
+      // Create order without payment
+      const order = {
+        customer: {
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          address: formData.address,
+        },
+        items: items.map(item => ({
+          productId: item.id,
+          productName: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          image: item.instagramPostId,
+        })),
+        total: getTotalPrice(),
+        notes: formData.notes || undefined,
+        payment: {
+          method: {
+            provider: 'test' as const,
+            type: 'credit_card' as const,
+            last4: '0000',
+            brand: 'Test',
+          },
+          transactionId: `SKIP-${Date.now()}`,
+          paidAt: new Date().toISOString(),
+        },
+      };
+
+      addOrder(order);
+      clearCart();
+      setIsSubmitting(false);
+      setShowCheckout(false);
+      setCheckoutStep('details');
+      
+      toast.success('🎉 הזמנה נוצרה ללא תשלום (מצב בדיקה)');
+      
+      // Reset form
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: '',
+      });
+      setCardData(null);
+
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('❌ אירעה שגיאה');
+      setIsSubmitting(false);
+    }
+  };
+
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -516,6 +578,16 @@ export default function CartPage() {
                         {isSubmitting ? 'מעבד תשלום...' : `שלם ₪${getTotalPrice().toFixed(2)}`}
                       </button>
                     </div>
+
+                    {/* Skip Payment for Testing */}
+                    <button
+                      type="button"
+                      onClick={handleSkipPayment}
+                      disabled={isSubmitting}
+                      className="w-full text-sm text-gray-600 hover:text-gray-900 underline disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      🧪 דלג על תשלום (מצב בדיקה)
+                    </button>
 
                     <p className="text-xs text-gray-500 text-center">
                       התשלום מאובטח ומוצפן. לא נשמור את פרטי הכרטיס שלך.
