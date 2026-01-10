@@ -29,6 +29,11 @@ export const metadata: Metadata = {
   creator: "Cookie Liza",
   publisher: "Cookie Liza",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://cookieliza.vercel.app'),
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+  },
   alternates: {
     canonical: '/',
   },

@@ -212,7 +212,7 @@ export default function CartPage() {
 
   if (getTotalItems() === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50" dir="rtl">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 overflow-x-hidden" dir="rtl">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16" role="main">
           <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-3xl shadow-2xl p-12 text-center border border-pink-100">
@@ -240,7 +240,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 overflow-x-hidden" dir="rtl">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12" role="main">
         <nav aria-label="ניווט דף">
           <Link 
